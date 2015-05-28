@@ -1,4 +1,4 @@
-package com.example.antonio.androidappseminar.data.model;
+package hr.apps.cookies.mcpare.data;
 
 import java.sql.Date;
 

@@ -1,4 +1,4 @@
-package com.example.antonio.androidappseminar.data.model;
+package hr.apps.cookies.mcpare.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -65,9 +65,10 @@ public class ZapisHelper extends SQLiteOpenHelper {
         values.put(KEY_OSNOVICA, zapis.getOsnovica());
         values.put(KEY_KOEF_PLACA, zapis.getKoefPlaca());
 
-        long id = db.insert(TABLE_ZAPIS, null, values);
+        //long id = db.insert(TABLE_ZAPIS, null, values);
 
-        return id;
+        //return id;
+        return db.insert(TABLE_ZAPIS, null, values);
     }
 
     public long insertZapis(Zapis zapis){
@@ -80,9 +81,10 @@ public class ZapisHelper extends SQLiteOpenHelper {
         values.put(KEY_OSNOVICA, zapis.getOsnovica());
         values.put(KEY_KOEF_PLACA, zapis.getKoefPlaca());
 
-        long id = db.insert(TABLE_ZAPIS,null,values);
+        //long id = db.insert(TABLE_ZAPIS,null,values);
 
-        return id;
+        //return id;
+        return db.insert(TABLE_ZAPIS, null, values);
     }
 
     public long deleteZapis(Zapis zapis){
@@ -94,9 +96,10 @@ public class ZapisHelper extends SQLiteOpenHelper {
                             KEY_OSNOVICA + " = " + zapis.getOsnovica() + " AND " +
                             KEY_KOEF_PLACA + " = " + zapis.getKoefPlaca();
 
-        long id = db.delete(TABLE_ZAPIS, whereClause, null);
+        //long id = db.delete(TABLE_ZAPIS, whereClause, null);
 
-        return id;
+        //return id;
+        return db.delete(TABLE_ZAPIS, whereClause, null);
     }
 
     public void deleteZapisByID(long id){

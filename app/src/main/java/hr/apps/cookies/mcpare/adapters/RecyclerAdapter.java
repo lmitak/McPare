@@ -9,9 +9,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import hr.apps.cookies.mcpare.R;
+import hr.apps.cookies.mcpare.data.Zapis;
 import hr.apps.cookies.mcpare.objects.Podaci;
 
 /**
@@ -21,9 +23,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     private LayoutInflater inflater;
     private Context context;
-    private List<Podaci> listaPodataka;
+    private List<Zapis> listaPodataka;
 
-    public RecyclerAdapter(Context context, List<Podaci> lista){
+    public RecyclerAdapter(Context context, List<Zapis> lista){
         listaPodataka = lista;
         this.context = context;
         inflater = LayoutInflater.from(context);
@@ -39,10 +41,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
-        Podaci podatak = listaPodataka.get(i);
-        myViewHolder.stavka1.setText(podatak.stavka1);
-        myViewHolder.stavka2.setText(podatak.stavka2);
-        myViewHolder.stavka3.setText(podatak.stavka3);
+        Zapis podatak = listaPodataka.get(i);
+        myViewHolder.stavka1.setText(podatak.getPozicija());
+        Double placa = podatak.getKoefPlaca() * podatak.getOsnovica();
+        myViewHolder.stavka2.setText(placa.toString());
+        myViewHolder.stavka3.setText(podatak.getDatum_do().toString());
     }
 
     @Override
