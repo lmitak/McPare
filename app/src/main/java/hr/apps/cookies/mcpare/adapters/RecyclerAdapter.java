@@ -8,9 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.data.Zapis;
@@ -42,10 +46,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
         Zapis podatak = listaPodataka.get(i);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm (EE)");
+        sdf.setTimeZone(TimeZone.getDefault());
+
+
         myViewHolder.pozicija.setText(podatak.getPozicija());
         Double placa = podatak.getKoefPlaca() * podatak.getOsnovica();
-        myViewHolder.datum_od.setText(new java.util.Date(podatak.getDatum_od().getTime()).toString());
-        myViewHolder.datum_do.setText(new java.util.Date(podatak.getDatum_do().getTime()).toLocaleString());
+        myViewHolder.datum_od.setText(sdf.format(new java.util.Date(podatak.getDatum_od().getTime())));
+       // myViewHolder.datum_od.setText(new java.util.Date(podatak.getDatum_od().getTime()).toString());
+        myViewHolder.datum_do.setText(sdf.format(new java.util.Date(podatak.getDatum_do().getTime())));
     }
 
     @Override
