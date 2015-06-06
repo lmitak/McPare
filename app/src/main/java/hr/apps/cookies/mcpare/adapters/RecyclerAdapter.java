@@ -42,10 +42,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
         Zapis podatak = listaPodataka.get(i);
-        myViewHolder.stavka1.setText(podatak.getPozicija());
+        myViewHolder.pozicija.setText(podatak.getPozicija());
         Double placa = podatak.getKoefPlaca() * podatak.getOsnovica();
-        myViewHolder.stavka2.setText(placa.toString());
-        myViewHolder.stavka3.setText(podatak.getDatum_do().toString());
+        myViewHolder.datum_od.setText(new java.util.Date(podatak.getDatum_od().getTime()).toString());
+        myViewHolder.datum_do.setText(new java.util.Date(podatak.getDatum_do().getTime()).toLocaleString());
     }
 
     @Override
@@ -56,13 +56,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView stavka1, stavka2, stavka3;
+        TextView pozicija, datum_od, datum_do;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            stavka1 = (TextView) itemView.findViewById(R.id.stavka1);
-            stavka2 = (TextView) itemView.findViewById(R.id.stavka2);
-            stavka3 = (TextView) itemView.findViewById(R.id.stavka3);
+            pozicija = (TextView) itemView.findViewById(R.id.pozicija);
+            datum_od = (TextView) itemView.findViewById(R.id.pocetak);
+            datum_do = (TextView) itemView.findViewById(R.id.kraj);
         }
     }
 }
