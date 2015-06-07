@@ -1,6 +1,7 @@
 package hr.apps.cookies.mcpare.fragments;
 
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,6 +36,14 @@ public class FragmentTrenutni extends Fragment {
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
+    FragmentComunicator comunicator;
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        comunicator = (FragmentComunicator) activity;
+    }
 
 
     public FragmentTrenutni() {
@@ -91,7 +100,19 @@ public class FragmentTrenutni extends Fragment {
         TextView whatFragment = (TextView) layout.findViewById(R.id.whatFragment);
         whatFragment.setText("Ovo je fragment 0");
 
+        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
+        addZapis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                comunicator.startDialog();
+            }
+        });
+
         return layout;
+    }
+
+    public interface FragmentComunicator{
+        public void startDialog();
     }
 
 }

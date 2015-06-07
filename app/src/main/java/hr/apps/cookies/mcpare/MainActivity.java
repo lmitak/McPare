@@ -1,6 +1,7 @@
 package hr.apps.cookies.mcpare;
 
 import android.content.Intent;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,10 +16,12 @@ import com.github.clans.fab.FloatingActionButton;
 
 import hr.apps.cookies.mcpare.adapters.PagerAdapter;
 import hr.apps.cookies.mcpare.dialogs.NumberPickerDialog;
+import hr.apps.cookies.mcpare.dialogs.RadnoVrijemeDialog;
+import hr.apps.cookies.mcpare.fragments.FragmentTrenutni;
 import hr.apps.cookies.mcpare.tabs.SlidingTabLayout;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements FragmentTrenutni.FragmentComunicator, RadnoVrijemeDialog.DialogComunicator {
 
     Toolbar toolbar;
     SlidingTabLayout tabs;
@@ -71,5 +74,28 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void startDialog() {
+        DialogFragment dialog = new RadnoVrijemeDialog();
+        /*kada ga tek pozivamo je rednibroj dana 0(nula), tj. trenutni dan*/
+        Bundle args = new Bundle();
+        args.putInt("redniBroj", 0);
+        dialog.setArguments(args);
+        /*možemo slati tag fragmenta*/
+        dialog.show(getSupportFragmentManager(), "TAG1");
+    }
+
+    @Override
+    public void pozoviSljDialog(int redniBroj) {
+
+
+
+        DialogFragment dialog = new RadnoVrijemeDialog();
+        Bundle args = new Bundle();
+        args.putInt("redniBroj", redniBroj);
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(), "Dialog");
     }
 }
