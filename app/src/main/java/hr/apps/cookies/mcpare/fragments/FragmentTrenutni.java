@@ -78,9 +78,11 @@ public class FragmentTrenutni extends Fragment {
         podaci.add(new Zapis("KUH",new java.sql.Date(start.getTime()),new java.sql.Date(end.getTime()), (double) 19,1.8));
         podaci.add(new Zapis("IST",new java.sql.Date(start.getTime()),new Date(end.getTime()),(double)18,1.0));
 */
-        FloatingActionButton button = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        button.show(true);
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
+
+        //FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
+        //button.show(true);
+
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
         adapter = new RecyclerAdapter(getActivity(), podaci);
         recyclerView.setAdapter(adapter);

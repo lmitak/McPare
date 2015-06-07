@@ -1,9 +1,11 @@
 package hr.apps.cookies.mcpare;
 
+import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +23,7 @@ public class MainActivity extends ActionBarActivity {
     Toolbar toolbar;
     SlidingTabLayout tabs;
     ViewPager pager;
+    public Button flowButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,9 @@ public class MainActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         pager = (ViewPager) findViewById(R.id.pager);
         tabs = (SlidingTabLayout) findViewById(R.id.tabs);
+
+        //flowButton = (Button) findViewById(R.id.fab);
+
         pager.setAdapter(new PagerAdapter(getSupportFragmentManager(), getApplicationContext()));
         pager.setCurrentItem(1, true);
         tabs.setViewPager(pager);
@@ -59,6 +65,9 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }
+        if (id == R.id.satnica){
+            startActivity(new Intent(getApplicationContext(), SatniceActivity.class));
         }
 
         return super.onOptionsItemSelected(item);

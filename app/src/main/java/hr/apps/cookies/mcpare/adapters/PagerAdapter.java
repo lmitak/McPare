@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.widget.Button;
 
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.fragments.FragmentProsli;
@@ -16,11 +17,13 @@ import hr.apps.cookies.mcpare.fragments.FragmentTrenutni;
 public class PagerAdapter extends FragmentPagerAdapter {
 
     String[] tabsTitles;
+    Context context;
 
     public PagerAdapter(FragmentManager fm, Context context)
     {
         super(fm);
         tabsTitles = context.getResources().getStringArray(R.array.tabs_titles);
+        this.context = context;
     }
 
     @Override

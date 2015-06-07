@@ -69,9 +69,11 @@ public class FragmentProsli extends Fragment {
         podaci.add(new Zapis("KUH",new Date(start.getTime()),new Date(end.getTime()),(double)21,1.8));
         podaci.add(new Zapis("IST",new Date(start.getTime()),new Date(end.getTime()),(double)18,1.0));*/
 
-        FloatingActionButton button = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        button.hide(true);
+        //FloatingActionButton button = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
+        //FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
+        //button.hide(true);
+
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
         adapter = new RecyclerAdapter(getActivity(), podaci);
         recyclerView.setAdapter(adapter);
@@ -81,4 +83,6 @@ public class FragmentProsli extends Fragment {
 
         return layout;
     }
+
+
 }

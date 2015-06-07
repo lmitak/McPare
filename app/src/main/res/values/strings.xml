@@ -13,4 +13,6 @@
         <item>Trenutni</item>
         <item>Sljedeći</item>
     </string-array>
+    <string name="title_activity_satnice">SatniceActivity</string>
+    <string name="preference_file_key">hr.apps.cookies.mcpare.PREFERENCE_FILE_KEY</string>
 </resources>
