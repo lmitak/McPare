@@ -27,6 +27,9 @@ public class MainActivity extends ActionBarActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setLogo(R.mipmap.mclogo);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
         pager = (ViewPager) findViewById(R.id.pager);
         tabs = (SlidingTabLayout) findViewById(R.id.tabs);
         pager.setAdapter(new PagerAdapter(getSupportFragmentManager(), getApplicationContext()));

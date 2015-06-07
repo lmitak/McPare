@@ -3,6 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="?android:attr/actionBarSize"
     android:background="@color/dark_green"
-    android:theme="@style/MyCustomToolBarTheme">
-
+    android:theme="@style/MyCustomToolBarTheme"
+    >
 </android.support.v7.widget.Toolbar>
