@@ -46,7 +46,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
         Zapis podatak = listaPodataka.get(i);
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm (EE)");
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm - dd. MMMM (EE)");
         sdf.setTimeZone(TimeZone.getDefault());
 
 
