@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.github.clans.fab.FloatingActionButton;
+
 import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -65,6 +67,9 @@ public class FragmentSljedeci extends Fragment {
         // ćemo al ovo ostaje samo nezz jel ćemo to unosit u svim slučajevima
         podaci.add(new Zapis("KUH",new Date(start.getTime()),new Date(end.getTime()),(double) 19,1.8));
         podaci.add(new Zapis("IST",new Date(start.getTime()),new Date(end.getTime()),(double)18,1.0));*/
+
+        FloatingActionButton button = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        button.show(true);
 
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
