@@ -17,6 +17,7 @@
         android:gravity="center"
         android:layout_gravity="center_horizontal"
         android:text="@string/dodaj_zapis_text"
+        android:id="@+id/addZapis"
         />
 
     <android.support.v7.widget.RecyclerView

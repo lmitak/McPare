@@ -172,15 +172,15 @@ public class ZapisHelper extends SQLiteOpenHelper {
         String selectQuery = null;
 
         selectQuery = "SELECT * FROM " + TABLE_ZAPIS + " WHERE strftime('%m'," +
-                KEY_DATUM_OD + ") = strftime('%m'," + datum.toString() + ") AND strftime('%Y'," +
-                KEY_DATUM_OD + ") = strftime('%Y'," + datum.toString() + ") ORDER BY " +
+                KEY_DATUM_OD + ") = strftime('%m','" + datum.toString() + "') AND strftime('%Y'," +
+                KEY_DATUM_OD + ") = strftime('%Y','" + datum.toString() + "') ORDER BY " +
                 KEY_DATUM_OD + " ASC;";
 
         Log.e(LOG, selectQuery);
 
         Cursor c = db.rawQuery(selectQuery, null);
 
-        DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
         if (c.moveToFirst()) {
             do {
@@ -198,8 +198,10 @@ public class ZapisHelper extends SQLiteOpenHelper {
                     Log.i("parse exception", ex.getMessage());
                 }
 
+
                 z.setDatum_od(new java.sql.Date(dateStart.getTime()));//TODO check this stuff it might not work
                 z.setDatum_do(new java.sql.Date(dateFinish.getTime()));//TODO
+
                 z.setOsnovica(c.getDouble(4));
                 z.setKoefPlaca(c.getDouble(5));
 
