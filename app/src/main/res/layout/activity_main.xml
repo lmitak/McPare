@@ -45,10 +45,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
-                android:text="Plaća: "
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
+                android:text="Ukupno sati: "
+                android:textSize="18sp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
                 android:textColor="@color/pure_white"
                 android:gravity="center"
                 android:layout_gravity="center"/>
@@ -56,15 +56,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3000,50 kn"
-                android:id="@+id/placa_text"
-                android:textSize="20sp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textColor="@color/pure_white"
-                />
-
-
+                android:text="546 h"
+                android:id="@+id/sati_text"
+                android:textSize="18sp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:textColor="@color/pure_white"/>
 
         </LinearLayout>
 
@@ -78,14 +75,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             >
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ukupno sati: "
-                android:textSize="20sp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
+                android:textSize="18sp"
+                android:text="Plaća: "
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
                 android:textColor="@color/pure_white"
                 android:gravity="center"
                 android:layout_gravity="center"/>
@@ -93,12 +89,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="300 h"
-                android:id="@+id/sati_text"
-                android:textSize="20sp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textColor="@color/pure_white"/>
+                android:text="5150,65 kn"
+                android:id="@+id/placa_text"
+                android:textSize="18sp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:textColor="@color/pure_white"
+                />
+
 
         </LinearLayout>
 
