@@ -5,4 +5,11 @@
     <color name="accent_color">#FFEB3B</color>
     <color name="color_highlight">#FFCDD2</color>
 
+    <color name="dark_green">#091A0C</color>
+    <color name="mc_yellow">#FFC300</color>
+    <color name="lightgreen">#34543C</color>
+    <color name="grayish">#EFEFF1</color>
+    <color name="browny">#1C130C</color>
+    <color name="pure_white">#FFFFFF</color>
+
 </resources>

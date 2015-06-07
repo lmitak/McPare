@@ -30,8 +30,10 @@ public class MainActivity extends ActionBarActivity {
         pager = (ViewPager) findViewById(R.id.pager);
         tabs = (SlidingTabLayout) findViewById(R.id.tabs);
         pager.setAdapter(new PagerAdapter(getSupportFragmentManager(), getApplicationContext()));
-        pager.setCurrentItem(1,true);
+        pager.setCurrentItem(1, true);
         tabs.setViewPager(pager);
+        int colors[] = {getResources().getColor(R.color.mc_yellow)};
+        tabs.setSelectedIndicatorColors(colors);
 
     }
 
