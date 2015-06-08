@@ -83,15 +83,12 @@ public class MainActivity extends ActionBarActivity implements FragmentTrenutni.
         Bundle args = new Bundle();
         args.putInt("redniBroj", 0);
         dialog.setArguments(args);
-        /*možemo slati tag fragmenta*/
+        /*moï¿½emo slati tag fragmenta*/
         dialog.show(getSupportFragmentManager(), "TAG1");
     }
 
     @Override
     public void pozoviSljDialog(int redniBroj) {
-
-
-
         DialogFragment dialog = new RadnoVrijemeDialog();
         Bundle args = new Bundle();
         args.putInt("redniBroj", redniBroj);

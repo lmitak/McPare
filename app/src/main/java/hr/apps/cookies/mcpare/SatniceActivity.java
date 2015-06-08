@@ -40,12 +40,12 @@ public class SatniceActivity extends ActionBarActivity{
         sharedPref = getApplicationContext().getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         final SharedPreferences.Editor editor = sharedPref.edit();
 
-        normalna.setText(sharedPref.getString("normalna", "0"));
-        nocna.setText(sharedPref.getString("nocna", "0"));
-        nedjeljna.setText(sharedPref.getString("nedjeljna", "0"));
-        ned_nocna.setText(sharedPref.getString("ned_nocna", "0"));
-        blagdan.setText(sharedPref.getString("blagdan", "0"));
-        blagdan_nocna.setText(sharedPref.getString("blagdan_nocna", "0"));
+        normalna.setText(sharedPref.getString("normalna", ""));
+        nocna.setText(sharedPref.getString("nocna", ""));
+        nedjeljna.setText(sharedPref.getString("nedjeljna", ""));
+        ned_nocna.setText(sharedPref.getString("ned_nocna", ""));
+        blagdan.setText(sharedPref.getString("blagdan", ""));
+        blagdan_nocna.setText(sharedPref.getString("blagdan_nocna", ""));
 
 
 
@@ -180,5 +180,8 @@ public class SatniceActivity extends ActionBarActivity{
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 }
