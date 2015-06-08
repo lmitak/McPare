@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -32,6 +33,8 @@ public class FragmentSljedeci extends Fragment {
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
+    FragmentProsli.FragmentComunicator comunicator;
+
 
 
     public FragmentSljedeci() {
@@ -82,6 +85,18 @@ public class FragmentSljedeci extends Fragment {
         TextView whatFragment = (TextView) layout.findViewById(R.id.whatFragment);
         whatFragment.setText("Ovo je fragment +1");
 
+        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
+        addZapis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                comunicator.startDialog();
+            }
+        });
+
         return layout;
+    }
+
+    public interface FragmentComunicator{
+        public void startDialog();
     }
 }

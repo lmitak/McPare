@@ -8,9 +8,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.clans.fab.FloatingActionButton;
+//import com.github.clans.fab.FloatingActionButton;
 
 import java.sql.Date;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ import hr.apps.cookies.mcpare.objects.Podaci;
 public class FragmentProsli extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
+    FragmentComunicator comunicator;
 
 
     public FragmentProsli() {
@@ -81,8 +83,19 @@ public class FragmentProsli extends Fragment {
         TextView whatFragment = (TextView) layout.findViewById(R.id.whatFragment);
         whatFragment.setText("Ovo je fragment -1");
 
+        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
+        addZapis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                comunicator.startDialog();
+            }
+        });
+
         return layout;
     }
 
+    public interface FragmentComunicator{
+        public void startDialog();
+    }
 
 }
