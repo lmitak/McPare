@@ -49,13 +49,45 @@ public class RadnoVrijemeDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_radno_vrijeme_dialog, null);
-        final  Calendar today = Calendar.getInstance();;
+        final  Calendar today = Calendar.getInstance();
+        final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        DateFormat monthFormat = new SimpleDateFormat("MM");
+        DateFormat yearFormat = new SimpleDateFormat("yyyy");
+
 
         if (getArguments() != null){
             Bundle bundle = getArguments();
             datumUMs = bundle.getLong("datum", today.getTimeInMillis());
             today.setTimeInMillis(datumUMs);
             recylcerTAG = bundle.getString("recylcerTAG");
+        }
+
+        if (recylcerTAG == "sljedeci"){
+            Calendar cToday = Calendar.getInstance();
+            cToday.setTimeInMillis(datumUMs);
+            String curr_month = monthFormat.format(cToday.getTime());
+            String curr_year = yearFormat.format(cToday.getTime());
+            int integer_month = Integer.parseInt(curr_month);
+            integer_month++;
+            Date eJbg = new Date();
+            if (integer_month < 10){
+                String nextMonth = "01.0" + integer_month + "." + curr_year;
+                try {
+                     eJbg = dateFormat.parse(nextMonth);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                today.setTime(eJbg);
+            }else {
+                String nextMonth = "01." + integer_month + "." + curr_year;
+                try {
+                    eJbg = dateFormat.parse(nextMonth);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                today.setTime(eJbg);
+            }
+
         }
 
         //final Calendar today = Calendar.getInstance();
@@ -77,7 +109,7 @@ public class RadnoVrijemeDialog extends DialogFragment {
         final EditText krajET = (EditText)view.findViewById(R.id.kraj_tp);
 
         final EditText trenutniDatum = (EditText) view.findViewById(R.id.trenutniDatumTv);
-        final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
 
 
 
