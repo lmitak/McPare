@@ -15,10 +15,12 @@ import android.widget.TextView;
 import java.sql.Date;
 import java.util.List;
 
+import hr.apps.cookies.mcpare.MainActivity;
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.adapters.RecyclerAdapter;
 import hr.apps.cookies.mcpare.data.Zapis;
 import hr.apps.cookies.mcpare.data.ZapisHelper;
+import hr.apps.cookies.mcpare.objects.RecyclerItemClickListener;
 
 
 /**
@@ -90,6 +92,14 @@ public class FragmentTrenutni extends Fragment {
         adapter = new RecyclerAdapter(getActivity(), podaci);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        comunicator.editDialog(recyclerView.getTag().toString(), position);
+                    }
+                })
+        );
 
         TextView whatFragment = (TextView) layout.findViewById(R.id.whatFragment);
         whatFragment.setText("Ovo je fragment 0");
@@ -107,6 +117,7 @@ public class FragmentTrenutni extends Fragment {
 
     public interface FragmentTrenutniComunicator {
         public void startDialog(String recylcerTag);
+        public void editDialog(String recylcerTag, int position);
     }
 
     public void dodajURecycler(String pozicija, Date datum, Date start, Date end){
@@ -115,6 +126,11 @@ public class FragmentTrenutni extends Fragment {
     }
     public void izbrisiIzRecycler(int pozicija) {
         podaci.remove(pozicija);
+        adapter.notifyDataSetChanged();
+    }
+    public void updateItemInRecycle(String pozicija, Date datum, Date start, Date end, int pos){
+        podaci.add(pos,new Zapis(pozicija, start, end, (double)18,1.3));
+        podaci.remove(pos+1);
         adapter.notifyDataSetChanged();
     }
 

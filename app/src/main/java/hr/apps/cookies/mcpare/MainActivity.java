@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import hr.apps.cookies.mcpare.adapters.PagerAdapter;
+import hr.apps.cookies.mcpare.dialogs.EditDialog;
 import hr.apps.cookies.mcpare.dialogs.RadnoVrijemeDialog;
 import hr.apps.cookies.mcpare.fragments.FragmentProsli;
 import hr.apps.cookies.mcpare.fragments.FragmentSljedeci;
@@ -29,13 +30,15 @@ public class MainActivity extends ActionBarActivity
         implements FragmentTrenutni.FragmentTrenutniComunicator,
         FragmentSljedeci.FragmentSljedeciComunicator,
         //FragmentProsli.FragmentProsliComunicator,
-        RadnoVrijemeDialog.DialogComunicator {
+        RadnoVrijemeDialog.DialogComunicator,
+        EditDialog.EditDialogComunicator{
 
     Toolbar toolbar;
     SlidingTabLayout tabs;
     ViewPager pager;
     FloatingActionButton flowButton;
     PagerAdapter pagerAdapter;
+    int pozicijaFragmenta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,7 @@ public class MainActivity extends ActionBarActivity
 
             @Override
             public void onPageSelected(int position) {
+                 pozicijaFragmenta = position;
                 if (position == 0){
                     flowButton.hide(true);
                 }else {
@@ -117,6 +121,17 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    public void editDialog(String recylcerTag, int position) {
+        DialogFragment dialog = new EditDialog();
+
+        Bundle args = new Bundle();
+        args.putString("recylcerTAG", recylcerTag);
+        args.putInt("position", position);
+        dialog.setArguments(args);
+        dialog.show(getSupportFragmentManager(), "TAG1");
+    }
+
+    @Override
     public void pozoviSljDialog(long datumUMs) {
         DialogFragment dialog = new RadnoVrijemeDialog();
         Bundle args = new Bundle();
@@ -139,4 +154,30 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
+    @Override
+    public void updatePodatka(String pozicija, java.sql.Date start, java.sql.Date end, java.sql.Date currentDate, String recyclerTAG, int position) {
+        if (recyclerTAG.equals("trenutni")){
+            FragmentTrenutni fragment;
+            fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment.updateItemInRecycle(pozicija, start, end ,currentDate, position);
+
+        }else if (recyclerTAG.equals("sljedeci")){
+            FragmentSljedeci fragment;
+            fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment.updateItemInRecycle(pozicija, start, end ,currentDate, position);
+        }
+    }
+
+    @Override
+    public void brisanje(int position) {
+        if (pozicijaFragmenta == 1){
+            FragmentTrenutni fragment;
+            fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment.izbrisiIzRecycler(position);
+        }else if (pozicijaFragmenta == 2){
+            FragmentSljedeci fragment;
+            fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment.izbrisiIzRecycler(position);
+        }
+    }
 }
