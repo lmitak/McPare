@@ -48,7 +48,8 @@ public class FragmentProsli extends Fragment {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new java.util.Date());
         //calendar.setTime(new java.util.Date());
-        calendar.add(Calendar.MONTH,1);
+        //calendar.add(Calendar.MONTH,1);
+        calendar.roll(Calendar.MONTH,false);
         java.util.Date datum = calendar.getTime();
         Log.e("Datum out: ", datum.toString());
 

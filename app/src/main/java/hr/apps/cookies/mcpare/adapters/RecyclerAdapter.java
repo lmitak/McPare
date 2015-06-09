@@ -3,12 +3,14 @@ package hr.apps.cookies.mcpare.adapters;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -47,14 +49,24 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
         Zapis podatak = listaPodataka.get(i);
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm - dd. MMMM (EE)");
-        sdf.setTimeZone(TimeZone.getDefault());
+        SimpleDateFormat dbOutFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        //sdf.setTimeZone(TimeZone.getDefault());
 
+        java.util.Date pocDate = null,zavDate = null;
+        try {
+            pocDate = dbOutFormat.parse(podatak.getDatum_od());
+            zavDate = dbOutFormat.parse(podatak.getDatum_do());
+        } catch (ParseException e) {
+            e.printStackTrace();
+            Log.e("RecyclerAdapterCrko","parsanje datume kihnulo");
+        }
 
         myViewHolder.pozicija.setText(podatak.getPozicija());
         Double placa = podatak.getKoefPlaca() * podatak.getOsnovica();
-        myViewHolder.datum_od.setText(sdf.format(new java.util.Date(podatak.getDatum_od().getTime())));
+        myViewHolder.datum_od.setText(sdf.format(pocDate));
        // myViewHolder.datum_od.setText(new java.util.Date(podatak.getDatum_od().getTime()).toString());
-        myViewHolder.datum_do.setText(sdf.format(new java.util.Date(podatak.getDatum_do().getTime())));
+        myViewHolder.datum_do.setText(sdf.format(zavDate));
+        //myViewHolder.datum_do.setText("dadas");
     }
 
     @Override

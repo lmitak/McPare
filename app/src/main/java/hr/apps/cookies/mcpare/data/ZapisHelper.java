@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -76,8 +77,8 @@ public class ZapisHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_POZICIJA,zapis.getPozicija());
-        values.put(KEY_DATUM_OD, String.valueOf(new java.sql.Date(zapis.getDatum_od().getTime())));//TODO watch this if it goes batshit crazy then something is wrong
-        values.put(KEY_DATUM_DO, String.valueOf(new java.sql.Date(zapis.getDatum_do().getTime())));//TODO watch this if it goes batshit crazy then something is wrong
+        values.put(KEY_DATUM_OD, String.valueOf(zapis.getDatum_od()));//TODO watch this if it goes batshit crazy then something is wrong
+        values.put(KEY_DATUM_DO, String.valueOf(zapis.getDatum_do()));//TODO watch this if it goes batshit crazy then something is wrong
         values.put(KEY_OSNOVICA, zapis.getOsnovica());
         values.put(KEY_KOEF_PLACA, zapis.getKoefPlaca());
 
@@ -144,18 +145,18 @@ public class ZapisHelper extends SQLiteOpenHelper {
                 z.setId(c.getInt(0));
                 z.setPozicija(c.getString(1));
 
-                java.util.Date dateStart = null;
-                java.util.Date dateFinish = null;
-                try {
-                    dateStart = df.parse(c.getString(2));
-                    dateFinish = df.parse(c.getString(3));
-                }
-                catch (ParseException ex){
-                    Log.i("parse exception", ex.getMessage());
-                }
+//                java.util.Date dateStart = null;
+//                java.util.Date dateFinish = null;
+//                try {
+//                    dateStart = df.parse(c.getString(2));
+//                    dateFinish = df.parse(c.getString(3));
+//                }
+//                catch (ParseException ex){
+//                    Log.i("parse exception", ex.getMessage());
+//                }
 
-                z.setDatum_od(new java.sql.Date(dateStart.getTime()));//TODO check this stuff it might not work
-                z.setDatum_do(new java.sql.Date(dateFinish.getTime()));//TODO
+                z.setDatum_od(c.getString(2));//TODO check this stuff it might not work
+                z.setDatum_do(c.getString(3));//TODO
                 z.setOsnovica(c.getDouble(4));
                 z.setKoefPlaca(c.getDouble(5));
 
@@ -180,7 +181,7 @@ public class ZapisHelper extends SQLiteOpenHelper {
 
         Cursor c = db.rawQuery(selectQuery, null);
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        //SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
         if (c.moveToFirst()) {
             do {
@@ -188,19 +189,19 @@ public class ZapisHelper extends SQLiteOpenHelper {
                 z.setId(c.getInt(0));
                 z.setPozicija(c.getString(1));
 
-                java.util.Date dateStart = null;
-                java.util.Date dateFinish = null;
-                try {
-                    dateStart = df.parse(c.getString(2));
-                    dateFinish = df.parse(c.getString(3));
-                }
-                catch (ParseException ex){
-                    Log.i("parse exception", ex.getMessage());
-                }
+//                java.util.Date dateStart = null;
+//                java.util.Date dateFinish = null;
+//                try {
+//                    dateStart = df.parse(c.getString(2));
+//                    dateFinish = df.parse(c.getString(3));
+//                }
+//                catch (ParseException ex){
+//                    Log.i("parse exception", ex.getMessage());
+//                }
 
 
-                z.setDatum_od(new java.sql.Date(dateStart.getTime()));//TODO check this stuff it might not work
-                z.setDatum_do(new java.sql.Date(dateFinish.getTime()));//TODO
+                z.setDatum_od(c.getString(2));//TODO check this stuff it might not work
+                z.setDatum_do(c.getString(3));//TODO
 
                 z.setOsnovica(c.getDouble(4));
                 z.setKoefPlaca(c.getDouble(5));

@@ -6,27 +6,20 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.clans.fab.FloatingActionButton;
-
 import java.sql.Date;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import hr.apps.cookies.mcpare.R;
-import hr.apps.cookies.mcpare.adapters.PagerAdapter;
 import hr.apps.cookies.mcpare.adapters.RecyclerAdapter;
 import hr.apps.cookies.mcpare.data.Zapis;
 import hr.apps.cookies.mcpare.data.ZapisHelper;
-import hr.apps.cookies.mcpare.dialogs.NumberPickerDialog;
 
 
 /**
@@ -56,7 +49,7 @@ public class FragmentTrenutni extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 //        Button btnAdd = (Button)getActivity().findViewById(R.id.addZapis);
 //        btnAdd.setOnClickListener(new View.OnClickListener() {

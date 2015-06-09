@@ -54,7 +54,7 @@ public class FragmentSljedeci extends Fragment {
         calendar.add(Calendar.MONTH,1);
         java.util.Date datum = calendar.getTime();
 
-        List<Zapis> podaci = zapisHelper.getListZapisByMonth(new Date(new java.util.Date().getTime()));
+        List<Zapis> podaci = zapisHelper.getListZapisByMonth(new Date(datum.getTime()));
 
         //java.util.Date start = null,end = null;
 

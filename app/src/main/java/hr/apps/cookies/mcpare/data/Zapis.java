@@ -1,6 +1,7 @@
 package hr.apps.cookies.mcpare.data;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  * Created by Antonio on 21.5.2015..
@@ -8,8 +9,8 @@ import java.sql.Date;
 public class Zapis {
     int id;
     String pozicija;
-    Date datum_od;
-    Date datum_do;
+    String datum_od;
+    String datum_do;
     Double osnovica;
     Double koefPlaca;
 
@@ -17,8 +18,15 @@ public class Zapis {
 
     }
 
+    public Zapis(String pozicija,String datum_od,String datum_do){
+        this.pozicija = pozicija;
+        this.datum_od = datum_od;
+        this.datum_do = datum_do;
+        this.osnovica = null;
+        this.koefPlaca = null;
+    }
 
-    public Zapis(String pozicija,Date datum_od,Date datum_do,Double osnovica,Double koefPlaca){
+    public Zapis(String pozicija,String datum_od,String datum_do,Double osnovica,Double koefPlaca){
         this.pozicija = pozicija;
         this.datum_od = datum_od;
         this.datum_do = datum_do;
@@ -26,7 +34,7 @@ public class Zapis {
         this.koefPlaca = koefPlaca;
     }
 
-    public Zapis(int id,String pozicija,Date datum_od,Date datum_do,Double osnovica,Double koefPlaca){
+    public Zapis(int id,String pozicija,String datum_od,String datum_do,Double osnovica,Double koefPlaca){
         this.id = id;
         this.pozicija = pozicija;
         this.datum_od = datum_od;
@@ -43,19 +51,19 @@ public class Zapis {
         this.pozicija = pozicija;
     }
 
-    public Date getDatum_od() {
+    public String getDatum_od() {
         return datum_od;
     }
 
-    public void setDatum_od(Date datum_od) {
+    public void setDatum_od(String datum_od) {
         this.datum_od = datum_od;
     }
 
-    public Date getDatum_do() {
+    public String getDatum_do() {
         return datum_do;
     }
 
-    public void setDatum_do(Date datum_do) {
+    public void setDatum_do(String datum_do) {
         this.datum_do = datum_do;
     }
 
