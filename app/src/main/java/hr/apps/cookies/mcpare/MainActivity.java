@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import com.github.clans.fab.FloatingActionButton;
+
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +34,7 @@ public class MainActivity extends ActionBarActivity
     Toolbar toolbar;
     SlidingTabLayout tabs;
     ViewPager pager;
-    public Button flowButton;
+    FloatingActionButton flowButton;
     PagerAdapter pagerAdapter;
 
     @Override
@@ -48,15 +50,33 @@ public class MainActivity extends ActionBarActivity
         pager = (ViewPager) findViewById(R.id.pager);
         tabs = (SlidingTabLayout) findViewById(R.id.tabs);
 
-        //flowButton = (Button) findViewById(R.id.fab);
+        flowButton = (FloatingActionButton) findViewById(R.id.fab);
         pagerAdapter = new PagerAdapter(getSupportFragmentManager(), getApplicationContext());
         pager.setAdapter(pagerAdapter);
         pager.setCurrentItem(1, true);
         tabs.setViewPager(pager);
         int colors[] = {getResources().getColor(R.color.mc_yellow)};
         tabs.setSelectedIndicatorColors(colors);
+        tabs.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+            }
 
+            @Override
+            public void onPageSelected(int position) {
+                if (position == 0){
+                    flowButton.hide(true);
+                }else {
+                    flowButton.show(true);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     @Override
@@ -115,6 +135,7 @@ public class MainActivity extends ActionBarActivity
         }else if (recyclerTag.equals("sljedeci")){
             FragmentSljedeci fragment;
             fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment.dodajURecycler(pozicija, start, end, currentDate);
         }
     }
 

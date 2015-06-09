@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 //import com.github.clans.fab.FloatingActionButton;
 
+import com.github.clans.fab.FloatingActionButton;
+
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -83,6 +85,8 @@ public class FragmentProsli extends Fragment {
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
         //FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
         //button.hide(true);
+        //FloatingActionButton floatingButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        //((LinearLayout)floatingButton.getParent()).removeView(floatingButton);
 
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
         recyclerView.setTag("prosli");
