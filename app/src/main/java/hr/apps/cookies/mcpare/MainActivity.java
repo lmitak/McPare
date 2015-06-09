@@ -10,7 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.github.clans.fab.FloatingActionButton;
 
@@ -68,10 +70,10 @@ public class MainActivity extends ActionBarActivity
 
             @Override
             public void onPageSelected(int position) {
-                 pozicijaFragmenta = position;
-                if (position == 0){
+                pozicijaFragmenta = position;
+                if (position == 0) {
                     flowButton.hide(true);
-                }else {
+                } else {
                     flowButton.show(true);
                 }
             }
@@ -81,6 +83,25 @@ public class MainActivity extends ActionBarActivity
 
             }
         });
+
+        /*ovo æe biti jebeno sjebano, ali evo probat æu*/
+        flowButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (pozicijaFragmenta == 1){
+                    FragmentTrenutni fragment;
+                    fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+                    Toast.makeText(getApplicationContext(), "pozicija je 1", Toast.LENGTH_SHORT).show();
+                    fragment.pozoviComunicator();
+
+                }else if (pozicijaFragmenta == 2){
+                    FragmentSljedeci fragment;
+                    fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+                    fragment.pozoviComunicator();
+                }
+            }
+        });
+
     }
 
     @Override

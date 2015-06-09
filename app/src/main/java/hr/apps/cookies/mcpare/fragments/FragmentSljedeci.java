@@ -130,4 +130,7 @@ public class FragmentSljedeci extends Fragment {
         podaci.remove(pos+1);
         adapter.notifyDataSetChanged();
     }
+    public void pozoviComunicator(){
+        comunicator.startDialog(recyclerView.getTag().toString());
+    }
 }

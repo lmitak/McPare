@@ -34,6 +34,9 @@ public class FragmentTrenutni extends Fragment {
     List<Zapis> podaci;
 
 
+
+
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -132,6 +135,9 @@ public class FragmentTrenutni extends Fragment {
         podaci.add(pos,new Zapis(pozicija, start, end, (double)18,1.3));
         podaci.remove(pos+1);
         adapter.notifyDataSetChanged();
+    }
+    public void pozoviComunicator(){
+        comunicator.startDialog(recyclerView.getTag().toString());
     }
 
 }
