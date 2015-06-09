@@ -6,27 +6,19 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.github.clans.fab.FloatingActionButton;
-
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import hr.apps.cookies.mcpare.R;
-import hr.apps.cookies.mcpare.adapters.PagerAdapter;
 import hr.apps.cookies.mcpare.adapters.RecyclerAdapter;
 import hr.apps.cookies.mcpare.data.Zapis;
 import hr.apps.cookies.mcpare.data.ZapisHelper;
-import hr.apps.cookies.mcpare.dialogs.NumberPickerDialog;
 
 
 /**
@@ -36,13 +28,14 @@ public class FragmentTrenutni extends Fragment {
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
-    FragmentComunicator comunicator;
+    FragmentTrenutniComunicator comunicator;
+    List<Zapis> podaci;
 
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        comunicator = (FragmentComunicator) activity;
+        this.comunicator = (FragmentTrenutniComunicator) activity;
     }
 
 
@@ -69,7 +62,7 @@ public class FragmentTrenutni extends Fragment {
 
 
         ZapisHelper zapisHelper = new ZapisHelper(getActivity().getApplication());
-        List<Zapis> podaci = zapisHelper.getListZapisByMonth(new Date(new java.util.Date().getTime()));
+        podaci = zapisHelper.getListZapisByMonth(new Date(new java.util.Date().getTime()));
 
         java.util.Date start = null,end = null;
 
@@ -93,6 +86,7 @@ public class FragmentTrenutni extends Fragment {
         //button.show(true);
 
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
+        recyclerView.setTag("trenutni");
         adapter = new RecyclerAdapter(getActivity(), podaci);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -104,15 +98,24 @@ public class FragmentTrenutni extends Fragment {
         addZapis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                comunicator.startDialog();
+                comunicator.startDialog(recyclerView.getTag().toString());
             }
         });
 
         return layout;
     }
 
-    public interface FragmentComunicator{
-        public void startDialog();
+    public interface FragmentTrenutniComunicator {
+        public void startDialog(String recylcerTag);
+    }
+
+    public void dodajURecycler(String pozicija, Date datum, Date start, Date end){
+        podaci.add(new Zapis(pozicija, start, end, (double)18,1.3));
+        adapter.notifyDataSetChanged();
+    }
+    public void izbrisiIzRecycler(int pozicija) {
+        podaci.remove(pozicija);
+        adapter.notifyDataSetChanged();
     }
 
 }

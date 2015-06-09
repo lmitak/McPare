@@ -1,5 +1,6 @@
 package hr.apps.cookies.mcpare.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,9 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.github.clans.fab.FloatingActionButton;
+//import com.github.clans.fab.FloatingActionButton;
 
 import java.sql.Date;
 import java.text.ParseException;
@@ -31,12 +34,19 @@ import hr.apps.cookies.mcpare.objects.Podaci;
 public class FragmentProsli extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
+    //FragmentProsliComunicator comunicator;
+    List<Zapis> podaci;
 
 
     public FragmentProsli() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        //this.comunicator = (FragmentProsliComunicator) activity;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,7 +60,7 @@ public class FragmentProsli extends Fragment {
         java.util.Date datum = calendar.getTime();
         Log.e("Datum out: ", datum.toString());
 
-        List<Zapis> podaci = zapisHelper.getListZapisByMonth(new java.sql.Date(datum.getTime()));
+        podaci = zapisHelper.getListZapisByMonth(new java.sql.Date(datum.getTime()));
 
         //SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -75,14 +85,35 @@ public class FragmentProsli extends Fragment {
         //button.hide(true);
 
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
+        recyclerView.setTag("prosli");
         adapter = new RecyclerAdapter(getActivity(), podaci);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         TextView whatFragment = (TextView) layout.findViewById(R.id.whatFragment);
         whatFragment.setText("Ovo je fragment -1");
 
+        //brisanje
+        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
+        ((LinearLayout)addZapis.getParent()).removeView(addZapis);
+/*
+
+        addZapis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                comunicator.startDialog();
+            }
+        });
+*/
         return layout;
     }
+    /*
+        public interface FragmentProsliComunicator{
+            public void startDialog();
+        }
 
-
+    */
+    public void izbrisiIzRecycler(int pozicija) {
+        podaci.remove(pozicija);
+        adapter.notifyDataSetChanged();
+    }
 }

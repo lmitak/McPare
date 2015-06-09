@@ -1,5 +1,6 @@
 package hr.apps.cookies.mcpare.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -32,12 +34,20 @@ public class FragmentSljedeci extends Fragment {
 
     private RecyclerView recyclerView;
     private RecyclerAdapter adapter;
+    FragmentSljedeciComunicator comunicator;
+    List<Zapis> podaci;
+
 
 
     public FragmentSljedeci() {
         // Required empty public constructor
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.comunicator = (FragmentSljedeciComunicator) activity;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,7 +61,7 @@ public class FragmentSljedeci extends Fragment {
         calendar.add(Calendar.MONTH,1);
         java.util.Date datum = calendar.getTime();
 
-        List<Zapis> podaci = zapisHelper.getListZapisByMonth(new Date(new java.util.Date().getTime()));
+        podaci = zapisHelper.getListZapisByMonth(new Date(new java.util.Date().getTime()));
 
         //java.util.Date start = null,end = null;
 
@@ -75,6 +85,7 @@ public class FragmentSljedeci extends Fragment {
         button.show(true);
 */
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
+        recyclerView.setTag("sljedeci");
         adapter = new RecyclerAdapter(getActivity(), podaci);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -82,6 +93,26 @@ public class FragmentSljedeci extends Fragment {
         TextView whatFragment = (TextView) layout.findViewById(R.id.whatFragment);
         whatFragment.setText("Ovo je fragment +1");
 
+        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
+        addZapis.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                comunicator.startDialog(recyclerView.getTag().toString());
+            }
+        });
+
         return layout;
+    }
+
+    public interface FragmentSljedeciComunicator{
+        public void startDialog(String recyclerTag);
+    }
+    public void dodajURecycler(String pozicija, Date datum, Date start, Date end){
+        podaci.add(new Zapis(pozicija, start, end, (double) 18, 1.3));
+        adapter.notifyDataSetChanged();
+    }
+    public void izbrisiIzRecycler(int pozicija) {
+        podaci.remove(pozicija);
+        adapter.notifyDataSetChanged();
     }
 }

@@ -8,11 +8,19 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="dodaj_zapis_text">Dodaj novi zapis</string>
 
+    <string-array name="positions">
+        <item>KUH</item>
+        <item>LOB</item>
+        <item>BLG</item>
+        <item>IST</item>
+    </string-array>
+
     <string-array name="tabs_titles">
         <item>Prošli</item>
         <item>Trenutni</item>
         <item>Sljedeći</item>
     </string-array>
+
     <string name="title_activity_satnice">SatniceActivity</string>
     <string name="preference_file_key">hr.apps.cookies.mcpare.PREFERENCE_FILE_KEY</string>
 </resources>
