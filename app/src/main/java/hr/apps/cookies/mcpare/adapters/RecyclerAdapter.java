@@ -2,23 +2,17 @@ package hr.apps.cookies.mcpare.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import hr.apps.cookies.mcpare.R;
-import hr.apps.cookies.mcpare.data.Zapis;
-import hr.apps.cookies.mcpare.objects.Podaci;
+import hr.apps.cookies.mcpare.data.Posao;
 
 /**
  * Created by lmita_000 on 26.5.2015..
@@ -27,9 +21,9 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     private LayoutInflater inflater;
     private Context context;
-    private List<Zapis> listaPodataka;
+    private List<Posao> listaPodataka;
 
-    public RecyclerAdapter(Context context, List<Zapis> lista){
+    public RecyclerAdapter(Context context, List<Posao> lista){
         listaPodataka = lista;
         this.context = context;
         inflater = LayoutInflater.from(context);
@@ -45,16 +39,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     @Override
     public void onBindViewHolder(MyViewHolder myViewHolder, int i) {
-        Zapis podatak = listaPodataka.get(i);
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm - dd. MMMM (EE)");
-        sdf.setTimeZone(TimeZone.getDefault());
 
+        Posao podatak = listaPodataka.get(i);
+        SimpleDateFormat dayFormat = new SimpleDateFormat("EEE, dd.");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 
-        myViewHolder.pozicija.setText(podatak.getPozicija());
-        Double placa = podatak.getKoefPlaca() * podatak.getOsnovica();
-        myViewHolder.datum_od.setText(sdf.format(new java.util.Date(podatak.getDatum_od().getTime())));
-       // myViewHolder.datum_od.setText(new java.util.Date(podatak.getDatum_od().getTime()).toString());
-        myViewHolder.datum_do.setText(sdf.format(new java.util.Date(podatak.getDatum_do().getTime())));
+        Calendar calendar = Calendar.getInstance();
+        myViewHolder.pozicija.setText(podatak.getPozicija().getIme_pozicija());
+        myViewHolder.datum_do.setText(timeFormat.format(podatak.getKraj()));
+        myViewHolder.datum_od.setText(timeFormat.format(podatak.getPocetak()));
+        myViewHolder.datum.setText(dayFormat.format(podatak.getPocetak()));
     }
 
     @Override
@@ -65,13 +59,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.MyView
 
     class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView pozicija, datum_od, datum_do;
+        TextView pozicija, datum_od, datum_do, datum;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            pozicija = (TextView) itemView.findViewById(R.id.pozicija);
-            datum_od = (TextView) itemView.findViewById(R.id.pocetak);
-            datum_do = (TextView) itemView.findViewById(R.id.kraj);
+            pozicija = (TextView) itemView.findViewById(R.id.pozicijaText);
+            datum_od = (TextView) itemView.findViewById(R.id.pocetakText);
+            datum_do = (TextView) itemView.findViewById(R.id.krajText);
+            datum = (TextView) itemView.findViewById(R.id.datumText);
         }
     }
 }

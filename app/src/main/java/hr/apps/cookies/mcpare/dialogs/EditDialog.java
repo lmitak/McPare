@@ -3,35 +3,29 @@ package hr.apps.cookies.mcpare.dialogs;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import hr.apps.cookies.mcpare.R;
+import hr.apps.cookies.mcpare.data.Posao;
 
 
 public class EditDialog extends DialogFragment {
 
-    String recylcerTAG;
     Spinner positionSpinner;
     EditDialogComunicator editComunicator;
     int position;
+    Posao posao;
 
     public EditDialog() {
         super();
@@ -50,9 +44,12 @@ public class EditDialog extends DialogFragment {
 
         if (getArguments() != null){
             Bundle bundle = getArguments();
-            recylcerTAG = bundle.getString("recylcerTAG");
             position = bundle.getInt("position");
+            posao = bundle.getParcelable("posao");
         }
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
 
         positionSpinner = (Spinner)view.findViewById(R.id.spinner);
         ArrayAdapter<CharSequence> adapter =
@@ -61,10 +58,13 @@ public class EditDialog extends DialogFragment {
         positionSpinner.setAdapter(adapter);
 
         final EditText pocetakET = (EditText)view.findViewById(R.id.pocetak_tp);
+        //pocetakET.setText(zapis.getDatum_od().toString());
         final EditText krajET = (EditText)view.findViewById(R.id.kraj_tp);
+        pocetakET.setText(timeFormat.format(new java.util.Date(posao.getPocetak())));
+        krajET.setText(timeFormat.format(new java.util.Date(posao.getKraj())));
 
-        final EditText trenutniDatum = (EditText) view.findViewById(R.id.trenutniDatumTv);
-        final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        final EditText trenutniDatumET = (EditText) view.findViewById(R.id.trenutniDatumTv);
+        trenutniDatumET.setText(dateFormat.format(new java.util.Date(posao.getPocetak())));
 
         //vrši se postavljanje trenutnih podataka iz baze
 
@@ -74,36 +74,28 @@ public class EditDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 //vrši se brisanje
-                editComunicator.brisanje(position);
+                editComunicator.brisanje(position, posao);
             }
         });
         builder.setNeutralButton("Odustani", null);
         builder.setPositiveButton("Spremi", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                String ninja = trenutniDatum.getText().toString();
+                String ninja = trenutniDatumET.getText().toString();
 
                 String pos = positionSpinner.getSelectedItem().toString();
                 String startHour = pocetakET.getText().toString();
                 String endHour = krajET.getText().toString();
 
-                //ovo vjerojatno može i bolje
-                Calendar cStart = Calendar.getInstance();
-                Calendar cEnd = Calendar.getInstance();
-                Calendar cCurrent = Calendar.getInstance();
+                java.util.Date cur_date = new java.util.Date();
+
                 try {
-                    cStart.setTime(dateFormat.parse(startHour));
-                    cEnd.setTime(dateFormat.parse(endHour));
-                    cCurrent.setTime(dateFormat.parse(ninja));
+                    cur_date = dateFormat.parse(ninja);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
-                Date startSql = new Date(cStart.getTimeInMillis());
-                Date endSql = new Date(cEnd.getTimeInMillis());
-                Date currentSql = new Date(cCurrent.getTimeInMillis());
-
-                editComunicator.updatePodatka(pos, startSql, endSql, currentSql, recylcerTAG, position);
+                editComunicator.updatePodataka(pos, startHour, endHour, cur_date, position, posao.getId());
             }
         });
 
@@ -111,7 +103,7 @@ public class EditDialog extends DialogFragment {
     }
 
     public interface EditDialogComunicator{
-        public void updatePodatka(String pozicija, java.sql.Date start, java.sql.Date end, java.sql.Date currentDate, String recyclerTAG, int position);
-        public void brisanje(int position);
+        public void brisanje(int position, Posao posao);
+        public void updatePodataka(String pozicija, String pocetak, String kraj, java.util.Date currentDate, int position, int idPosla);
     }
 }
