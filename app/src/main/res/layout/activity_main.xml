@@ -35,7 +35,8 @@
         android:layout_marginRight="8dp"
         fab:fab_colorNormal="@color/lightgreen"
         fab:fab_colorPressed="@color/lightgreen"
-        fab:fab_colorRipple="@color/lightgreen"/>
+        fab:fab_colorRipple="@color/lightgreen"
+        android:src="@drawable/fab_add"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -67,7 +68,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="546 h"
+                android:text="312 h"
                 android:id="@+id/sati_text"
                 android:textSize="18sp"
                 android:paddingTop="6dp"
@@ -100,7 +101,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5150,65 kn"
+                android:text="5150 kn"
                 android:id="@+id/placa_text"
                 android:textSize="18sp"
                 android:paddingTop="6dp"

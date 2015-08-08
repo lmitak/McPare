@@ -16,9 +16,11 @@ import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.adapters.RecyclerAdapter;
+import hr.apps.cookies.mcpare.asyncTasks.FillRecyclerTask;
 import hr.apps.cookies.mcpare.data.DBHelper;
 import hr.apps.cookies.mcpare.data.Posao;
 
@@ -50,12 +52,23 @@ public class FragmentProsli extends Fragment {
         calendar.setTime(new java.util.Date());
         calendar.add(Calendar.MONTH, -1);
 
-        DBHelper helper = new DBHelper(getActivity().getApplicationContext());
-        podaci = helper.getAllJobsInMonth(calendar.getTimeInMillis());
+        //DBHelper helper = new DBHelper(getActivity().getApplicationContext());
+        //podaci = helper.getAllJobsInMonth(calendar.getTimeInMillis());
 
 
         //FloatingActionButton button = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
+
+        FillRecyclerTask recyclerTask = new FillRecyclerTask(getActivity().getApplicationContext());
+        recyclerTask.execute(calendar.getTimeInMillis());
+        try {
+            podaci = recyclerTask.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
         //FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
         //button.hide(true);
         //FloatingActionButton floatingButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
@@ -68,8 +81,8 @@ public class FragmentProsli extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         //brisanje gumba da se ne vidi
-        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
-        ((LinearLayout)addZapis.getParent()).removeView(addZapis);
+        /*Button addZapis = (Button) layout.findViewById(R.id.addZapis);
+        ((LinearLayout)addZapis.getParent()).removeView(addZapis);*/
 
         return layout;
     }

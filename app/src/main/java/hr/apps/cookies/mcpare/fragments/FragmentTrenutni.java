@@ -2,6 +2,7 @@ package hr.apps.cookies.mcpare.fragments;
 
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,9 +14,11 @@ import android.widget.Button;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.adapters.RecyclerAdapter;
+import hr.apps.cookies.mcpare.asyncTasks.FillRecyclerTask;
 import hr.apps.cookies.mcpare.data.DBHelper;
 import hr.apps.cookies.mcpare.data.Posao;
 import hr.apps.cookies.mcpare.objects.RecyclerItemClickListener;
@@ -48,11 +51,20 @@ public class FragmentTrenutni extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        DBHelper helper = new DBHelper(getActivity().getApplicationContext());
-        podaci = helper.getAllJobsInMonth(new java.util.Date().getTime());
-
+        //DBHelper helper = new DBHelper(getActivity().getApplicationContext());
+        //podaci = helper.getAllJobsInMonth(new java.util.Date().getTime());
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
 
+
+        FillRecyclerTask recyclerTask = new FillRecyclerTask(getActivity().getApplicationContext());
+        recyclerTask.execute(new java.util.Date().getTime());
+        try {
+            podaci = recyclerTask.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         //FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
         //button.show(true);
 
@@ -70,7 +82,7 @@ public class FragmentTrenutni extends Fragment {
                 })
         );
 
-
+        /*
         Button addZapis = (Button) layout.findViewById(R.id.addZapis);
         addZapis.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,7 +90,7 @@ public class FragmentTrenutni extends Fragment {
                 comunicator.startDialog();
             }
         });
-
+        */
         return layout;
     }
 

@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -33,6 +35,9 @@ public class RadnoVrijemeDialog extends DialogFragment {
     long datumUMs;
     Spinner positionSpinner;
     int kojiFragment;
+    EditText pocetakET, krajET, trenutniDatum;
+
+    DateFormat dateFormat;
 
     public RadnoVrijemeDialog(){};
 
@@ -48,7 +53,7 @@ public class RadnoVrijemeDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_radno_vrijeme_dialog, null);
         final  Calendar today = Calendar.getInstance();
-        final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         DateFormat monthFormat = new SimpleDateFormat("MM");
         DateFormat yearFormat = new SimpleDateFormat("yyyy");
 
@@ -96,10 +101,9 @@ public class RadnoVrijemeDialog extends DialogFragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         positionSpinner.setAdapter(adapter);
 
-        final EditText pocetakET = (EditText)view.findViewById(R.id.pocetak_tp);
-        final EditText krajET = (EditText)view.findViewById(R.id.kraj_tp);
-
-        final EditText trenutniDatum = (EditText) view.findViewById(R.id.trenutniDatumTv);
+        pocetakET = (EditText)view.findViewById(R.id.pocetak_tp);
+        krajET = (EditText)view.findViewById(R.id.kraj_tp);
+        trenutniDatum = (EditText) view.findViewById(R.id.trenutniDatumTv);
 
 
 
@@ -112,28 +116,17 @@ public class RadnoVrijemeDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
-                String ninja = trenutniDatum.getText().toString();
-                Date datumText = new Date();
-                try {
-                    datumText = dateFormat.parse(ninja);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                Calendar caki = Calendar.getInstance();
-                caki.setTime(datumText);
-                caki.add(Calendar.DAY_OF_YEAR, 1);
-
                 String pos = positionSpinner.getSelectedItem().toString();
                 String startHour = pocetakET.getText().toString();
                 String endHour = krajET.getText().toString();
 
                 //slanje podataka recylcerView-u fragmenta
-
-                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (ninja.toString().length() == 0)){
+                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() != null)) {
                     Toast.makeText(getActivity(), "Nisu ispunjena sva polja", Toast.LENGTH_SHORT).show();
-                }else{
-                    dialogComunicator.saljiPodatke(pos, startHour, endHour, datumText);
-                    dialogComunicator.pozoviSljDialog(caki.getTimeInMillis());
+                    //treba se nekako zaustaviti zatvaranje dijaloga u slučaju pogreške
+                } else {
+                    dialogComunicator.saljiPodatke(pos, startHour, endHour, givenDate());
+                    dialogComunicator.pozoviSljDialog(nextDay(givenDate()));
                 }
 
 
@@ -143,27 +136,16 @@ public class RadnoVrijemeDialog extends DialogFragment {
         builder.setNeutralButton("Završi", new OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Toast.makeText(getActivity(), "Zavrsit cu", Toast.LENGTH_SHORT).show();
-
-                String ninja = trenutniDatum.getText().toString();
-                Date datumText = new Date();
-                try {
-                    datumText = dateFormat.parse(ninja);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                Calendar caki = Calendar.getInstance();
-                caki.setTime(datumText);
-                caki.add(Calendar.DAY_OF_YEAR, 1);
 
                 String pos = positionSpinner.getSelectedItem().toString();
                 String startHour = pocetakET.getText().toString();
                 String endHour = krajET.getText().toString();
 
-                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (ninja.toString().length() == 0)){
+                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() != null)) {
                     Toast.makeText(getActivity(), "Nisu ispunjena sva polja", Toast.LENGTH_SHORT).show();
-                }else{
-                    dialogComunicator.saljiPodatke(pos, startHour, endHour, datumText);
+
+                } else {
+                    dialogComunicator.saljiPodatke(pos, startHour, endHour, givenDate());
                 }
             }
         });
@@ -172,6 +154,28 @@ public class RadnoVrijemeDialog extends DialogFragment {
 
         return builder.create();
     }
+
+    //dobavlja datum slj. dana
+    public long nextDay(Date currentDate){
+
+        Calendar nextDay = Calendar.getInstance();
+        nextDay.setTime(currentDate);
+        nextDay.add(Calendar.DAY_OF_YEAR, 1);
+        return nextDay.getTimeInMillis();
+    }
+    //dobalvja datum koji je korisnik zadao u dijalogu
+    public Date givenDate(){
+        String ninja = trenutniDatum.getText().toString();
+        Date datumText = new Date();
+        try {
+            datumText = dateFormat.parse(ninja);
+        } catch (ParseException e) {
+            Log.d("datumGreska", e.getMessage());
+            datumText = null;
+        }
+        return datumText;
+    }
+
 
 
     public interface DialogComunicator{

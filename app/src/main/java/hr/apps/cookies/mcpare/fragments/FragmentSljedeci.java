@@ -13,9 +13,11 @@ import android.widget.Button;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.adapters.RecyclerAdapter;
+import hr.apps.cookies.mcpare.asyncTasks.FillRecyclerTask;
 import hr.apps.cookies.mcpare.data.DBHelper;
 import hr.apps.cookies.mcpare.data.Posao;
 import hr.apps.cookies.mcpare.objects.RecyclerItemClickListener;
@@ -45,15 +47,25 @@ public class FragmentSljedeci extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        DBHelper helper = new DBHelper(getActivity().getApplicationContext());
+        //DBHelper helper = new DBHelper(getActivity().getApplicationContext());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new java.util.Date());
         calendar.add(Calendar.MONTH,1);
 
-        podaci = helper.getAllJobsInMonth(calendar.getTimeInMillis());
+        //podaci = helper.getAllJobsInMonth(calendar.getTimeInMillis());
 
 
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
+
+        FillRecyclerTask recyclerTask = new FillRecyclerTask(getActivity().getApplicationContext());
+        recyclerTask.execute(calendar.getTimeInMillis());
+        try {
+            podaci = recyclerTask.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 /*
         FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
         button.show(true);
@@ -72,7 +84,7 @@ public class FragmentSljedeci extends Fragment {
                 })
         );
 
-
+        /*
         Button addZapis = (Button) layout.findViewById(R.id.addZapis);
         addZapis.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -80,7 +92,7 @@ public class FragmentSljedeci extends Fragment {
                 comunicator.startDialog();
             }
         });
-
+        */
         return layout;
     }
 

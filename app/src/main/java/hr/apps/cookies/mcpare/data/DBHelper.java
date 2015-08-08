@@ -5,10 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import hr.apps.cookies.mcpare.R;
@@ -24,6 +24,7 @@ public class DBHelper extends SQLiteOpenHelper {
     //Tables
     private static String TABLE_POSAO = "posao";
     private static String TABLE_POZICIJA = "pozicija";
+    private static String TABLE_BLAGDANI = "blagdani";
 
     //Columns
     //table posao
@@ -34,6 +35,10 @@ public class DBHelper extends SQLiteOpenHelper {
     //table pozicija
     private static String COLUMN_NAZIV = "naziv";
     private static String COLUMN_POZICIJA_ID = "pozicija_id";
+    //table blagdani
+    private static String COLUMN_ID_BLAGDANA = "_id";
+    private static String COLUMN_DATUM_BLAGDANA = "datum";
+
 
     Context context;
 
@@ -58,6 +63,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 + COLUMN_KRAJ + " INTEGER,"
                 + "FOREIGN KEY (" + COLUMN_ID_POZICIJE + ") REFERENCES " + TABLE_POZICIJA + "(" + COLUMN_POZICIJA_ID + ")"
                 + ")");
+
+        sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_BLAGDANI + "("
+                + COLUMN_ID_BLAGDANA + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_DATUM_BLAGDANA + " INTEGER "
+                + ");");
 
         addInitialPositions(sqLiteDatabase);
     }
@@ -211,6 +221,71 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(TABLE_POSAO, values, whereCaluse, null);
 
         db.close();
+    }
+
+    //provjera da li je tablica blagdana popunjena
+    public boolean checkHolidaysTable(){
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor c = db.query(TABLE_BLAGDANI, new String[]{COLUMN_ID_BLAGDANA}, null, null, null, null, null);
+        if (c.getCount() > 1)
+        {
+            db.close();
+            return true;
+        }
+
+        else {
+            db.close();
+            return false;
+        }
+    }
+
+    //dodavanje svih blagdana u tablicu
+    public void fillHolidaysTable(List<Long> datumiMs){
+        SQLiteDatabase db = getWritableDatabase();
+
+        for (int i = 0; i < datumiMs.size(); i++){
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_DATUM_BLAGDANA, datumiMs.get(i));
+            db.insert(TABLE_BLAGDANI, null, values);
+        }
+        db.close();
+    }
+
+    public List<Posao> getAllJobsTillNow(){
+        List<Posao> poslovi = new ArrayList<>();
+        Date now = new Date();
+        SQLiteDatabase db = getReadableDatabase();
+        String select_query = "SELECT * FROM " + TABLE_POSAO
+                + " JOIN " + TABLE_POZICIJA + " ON " + COLUMN_POZICIJA_ID + " = " + COLUMN_ID_POZICIJE
+                + " WHERE " + COLUMN_POCETAK + " > " + now.getTime()
+                + " ORDER BY " + COLUMN_POCETAK + " ASC";
+        Cursor c = db.rawQuery(select_query, null);
+        //db.rawQuery("SELECT " + COLUMN_POCETAK + " FROM " + TABLE_POSAO + " WHERE")
+        if(c.moveToFirst()){
+            do {
+                poslovi.add(new Posao());
+            }while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return poslovi;
+    }
+
+    public List<Long> getAllHolidaysTillNow(){
+        List<Long> datumiBlagdana = new ArrayList<>();
+        Date now = new Date();
+        SQLiteDatabase db = getReadableDatabase();
+        String whereClause = COLUMN_DATUM_BLAGDANA + " < " + now.getTime();
+        Cursor c = db.query(TABLE_BLAGDANI, new String[]{COLUMN_DATUM_BLAGDANA}, whereClause, null, null, null, null);
+        if(c.moveToFirst()){
+            do {
+                datumiBlagdana.add(c.getLong(c.getColumnIndex(COLUMN_DATUM_BLAGDANA)));
+            }while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return datumiBlagdana;
     }
 
 }
