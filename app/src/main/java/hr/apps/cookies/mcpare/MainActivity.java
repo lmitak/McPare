@@ -285,6 +285,7 @@ public class MainActivity extends ActionBarActivity
 
         Calendar today = Calendar.getInstance();
         if (today.getTimeInMillis() > beginingAndEnd[1]){
+            Log.d("lukas", "prosao uvjet");
             pozoviRacunanje(idPosla);
         }
 
@@ -557,4 +558,10 @@ public class MainActivity extends ActionBarActivity
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RacunanjeTask racunanjeTask = new RacunanjeTask(MainActivity.this);
+        racunanjeTask.execute(0.0);
+    }
 }

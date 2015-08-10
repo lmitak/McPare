@@ -223,7 +223,7 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                     }
                 }
             }else {
-                Log.d("taskovi", "barem do tu");
+                Log.d("taskovi", "barem do tu(nedjelja ili radni dan)");
                 //niti ne počinje niti ne završava na blagdan
                 if (isSunday(p.getPocetak()) && isSunday(p.getKraj())){
                     //ako počinje i završava na nedjelju
@@ -287,6 +287,7 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                         // uvijet nepotreban
                     }
                 }else {
+                    Log.d("taskovi", "barem do tu(radni dan)");
                     //nije ni blagdan niti nedjelja (radni dan)
                     // niti ne počinje niti ne završava na nedjelju ulu blagdan
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
@@ -304,6 +305,7 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                                 + nocna * 2
                                 + nocna * zavrsavaNaDanSati(p.getKraj());
                     }else {
+                        Log.d("taskovi", "dnevni radni dan");
                         //ako počinje i završava u dnevnoj
                         iznos += dnevna * radniSati(p.getPocetak(), p.getKraj());
                     }
@@ -439,11 +441,5 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
         return kraj.get(Calendar.HOUR_OF_DAY);
     }
     //provjerava da li je nocna jutarnja
-    private boolean jutarnjaNocna(long dateTime){
-        Calendar date = Calendar.getInstance();
-        date.setTimeInMillis(dateTime);
-
-        return  date.get(Calendar.HOUR_OF_DAY) < 6;
-    }
 
 }
