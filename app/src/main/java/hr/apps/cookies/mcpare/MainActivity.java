@@ -263,14 +263,10 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void saljiPodatke(String pozicija, String pocetak, String kraj, Date currentDate) {
-        //long startDate = dateGetter(currentDate, pocetak);
-        //long endDate = dateGetter(currentDate, kraj);
         Long[] beginingAndEnd = beginingAndEndDate(currentDate, pocetak, kraj);
-        //Posao posao = new Posao(pozicija, getIdOfPosition(pozicija), startDate, endDate);
         Posao posao = new Posao(pozicija, getIdOfPosition(pozicija), beginingAndEnd[0], beginingAndEnd[1]);
         DBHelper helper = new DBHelper(getApplicationContext());
         long idPosla = helper.insertJob(posao);
-
 
         if (krajMjeseca() > beginingAndEnd[0])
         {
@@ -349,23 +345,6 @@ public class MainActivity extends ActionBarActivity
             fragment2.dodajURecycler(newPosao);
         }
 
-    }
-
-    private long dateGetter(Date currentDate, String pocetak){
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentDate);
-
-        String[] sati_i_minute = pocetak.split(":");
-
-        calendar.set(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH),
-                Integer.parseInt(sati_i_minute[0]),
-                Integer.parseInt(sati_i_minute[1])
-        );
-
-        return  calendar.getTimeInMillis();
     }
 
     private Long[] beginingAndEndDate(Date currentDate, String pocetak, String kraj){
