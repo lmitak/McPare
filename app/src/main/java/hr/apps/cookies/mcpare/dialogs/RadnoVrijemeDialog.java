@@ -13,7 +13,6 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -23,8 +22,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 import hr.apps.cookies.mcpare.R;
+import hr.apps.cookies.mcpare.data.CalculationHelper;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,10 +33,11 @@ import hr.apps.cookies.mcpare.R;
 public class RadnoVrijemeDialog extends DialogFragment {
 
     DialogComunicator dialogComunicator;
-    long datumUMs;
+    long zadanDatumMs;
     Spinner positionSpinner;
     int kojiFragment;
     EditText pocetakET, krajET, trenutniDatum;
+    Calendar today, zadanDatum;
 
     DateFormat dateFormat;
 
@@ -52,43 +54,33 @@ public class RadnoVrijemeDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_radno_vrijeme_dialog, null);
-        final  Calendar today = Calendar.getInstance();
+
+        today = Calendar.getInstance();
+        zadanDatum = Calendar.getInstance();
+
         dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         DateFormat monthFormat = new SimpleDateFormat("MM");
         DateFormat yearFormat = new SimpleDateFormat("yyyy");
 
         if (getArguments() != null){
             Bundle bundle = getArguments();
-            datumUMs = bundle.getLong("datum", today.getTimeInMillis());
-            today.setTimeInMillis(datumUMs);
-            kojiFragment = bundle.getInt("fragment");
+            zadanDatumMs = bundle.getLong("datum", today.getTimeInMillis());
+            zadanDatum.setTimeInMillis(zadanDatumMs);
         }
 
-        if (kojiFragment == 2){
-            Calendar cToday = Calendar.getInstance();
-            cToday.setTimeInMillis(datumUMs);
-            String curr_month = monthFormat.format(cToday.getTime());
-            String curr_year = yearFormat.format(cToday.getTime());
-            int integer_month = Integer.parseInt(curr_month);
-            integer_month++;
-            Date eJbg = new Date();
-            if (integer_month < 10){
-                String nextMonth = "01.0" + integer_month + "." + curr_year;
-                try {
-                     eJbg = dateFormat.parse(nextMonth);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                today.setTime(eJbg);
-            }else {
-                String nextMonth = "01." + integer_month + "." + curr_year;
-                try {
-                    eJbg = dateFormat.parse(nextMonth);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-                today.setTime(eJbg);
-            }
+
+        //ako je zadan mjesec veći od trenutnoga u pitanju je slj. mjesec
+        //možda nije potrebno
+        if (today.get(Calendar.MONTH) < zadanDatum.get(Calendar.MONTH)){
+
+
+
+            Calendar startOfNextMonth = Calendar.getInstance();
+            startOfNextMonth.setTimeInMillis(zadanDatumMs);
+            startOfNextMonth.set(startOfNextMonth.get(Calendar.YEAR),
+                    startOfNextMonth.get(Calendar.MONTH),
+                    1);
+            today.setTimeInMillis(startOfNextMonth.getTimeInMillis());
 
         }
 
@@ -108,7 +100,7 @@ public class RadnoVrijemeDialog extends DialogFragment {
 
 
 
-        trenutniDatum.setText(dateFormat.format(today.getTime()));
+        trenutniDatum.setText(dateFormat.format(zadanDatum.getTime()));
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);
 
@@ -121,15 +113,20 @@ public class RadnoVrijemeDialog extends DialogFragment {
                 String endHour = krajET.getText().toString();
 
                 //slanje podataka recylcerView-u fragmenta
-                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() != null)) {
+                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() == null)) {
                     Toast.makeText(getActivity(), "Nisu ispunjena sva polja", Toast.LENGTH_SHORT).show();
                     //treba se nekako zaustaviti zatvaranje dijaloga u slučaju pogreške
                 } else {
-                    dialogComunicator.saljiPodatke(pos, startHour, endHour, givenDate());
-                    dialogComunicator.pozoviSljDialog(nextDay(givenDate()));
+                    if (CalculationHelper.isMonthBefore(givenDate().getTime()) ||
+                            CalculationHelper.isMonthTooFarForward(givenDate().getTime())){
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Možete unositi podatke samo za trenutni i sljedeći mjesec", Toast.LENGTH_LONG).show();
+                    }else {
+                        dialogComunicator.saljiPodatke(pos, startHour, endHour, givenDate());
+                        dialogComunicator.pozoviSljDialog(nextDay(givenDate()));
+                    }
+
                 }
-
-
             }
         });
 
@@ -141,7 +138,7 @@ public class RadnoVrijemeDialog extends DialogFragment {
                 String startHour = pocetakET.getText().toString();
                 String endHour = krajET.getText().toString();
 
-                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() != null)) {
+                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() == null)) {
                     Toast.makeText(getActivity(), "Nisu ispunjena sva polja", Toast.LENGTH_SHORT).show();
 
                 } else {
@@ -166,7 +163,7 @@ public class RadnoVrijemeDialog extends DialogFragment {
     //dobalvja datum koji je korisnik zadao u dijalogu
     public Date givenDate(){
         String ninja = trenutniDatum.getText().toString();
-        Date datumText = new Date();
+        Date datumText;
         try {
             datumText = dateFormat.parse(ninja);
         } catch (ParseException e) {
@@ -177,9 +174,8 @@ public class RadnoVrijemeDialog extends DialogFragment {
     }
 
 
-
     public interface DialogComunicator{
-        public void pozoviSljDialog(long trenutniDateTime);
+        public void pozoviSljDialog(long sljedeciDan);
         public void saljiPodatke(String pozicija, String pocetak, String kraj, Date currentDate);
     }
 

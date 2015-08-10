@@ -11,12 +11,15 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import hr.apps.cookies.mcpare.R;
+import hr.apps.cookies.mcpare.data.CalculationHelper;
 import hr.apps.cookies.mcpare.data.Posao;
 
 
@@ -87,15 +90,24 @@ public class EditDialog extends DialogFragment {
                 String startHour = pocetakET.getText().toString();
                 String endHour = krajET.getText().toString();
 
-                java.util.Date cur_date = new java.util.Date();
+                java.util.Date givenDate = new java.util.Date();
+
+                //treba se provjeriti da li korisnik piše u prošli mjesec
+
+
 
                 try {
-                    cur_date = dateFormat.parse(ninja);
+                    givenDate = dateFormat.parse(ninja);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-
-                editComunicator.updatePodataka(pos, startHour, endHour, cur_date, position, posao.getId());
+                if (CalculationHelper.isMonthBefore(givenDate.getTime())
+                        || CalculationHelper.isMonthTooFarForward(givenDate.getTime())){
+                    Toast.makeText(getActivity().getApplicationContext(),
+                            "Možete unositi podatke samo za trenutni i sljedeći mjesec", Toast.LENGTH_LONG).show();
+                }else{
+                    editComunicator.updatePodataka(pos, startHour, endHour, givenDate, position, posao.getId());
+                }
             }
         });
 
@@ -106,4 +118,6 @@ public class EditDialog extends DialogFragment {
         public void brisanje(int position, Posao posao);
         public void updatePodataka(String pozicija, String pocetak, String kraj, java.util.Date currentDate, int position, int idPosla);
     }
+
+
 }
