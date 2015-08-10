@@ -36,8 +36,10 @@ import com.google.api.services.calendar.CalendarScopes;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 import hr.apps.cookies.mcpare.adapters.PagerAdapter;
+import hr.apps.cookies.mcpare.asyncTasks.CleanDBTask;
 import hr.apps.cookies.mcpare.asyncTasks.RacunanjeTask;
 import hr.apps.cookies.mcpare.data.DBHelper;
 import hr.apps.cookies.mcpare.data.Posao;
@@ -60,14 +62,13 @@ public class MainActivity extends ActionBarActivity
     ViewPager pager;
     FloatingActionButton flowButton;
     PagerAdapter pagerAdapter;
+    TextView sati_text, placa_text;
     int pozicijaFragmenta;
 
     //stvari od GoogleCalendar-a
     com.google.api.services.calendar.Calendar mService;
 
     GoogleAccountCredential credential;
-    private TextView mStatusText;
-    private TextView mResultsText;
     final HttpTransport transport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
 
@@ -84,34 +85,13 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sati_text = (TextView) findViewById(R.id.sati_text);
+        placa_text = (TextView) findViewById(R.id.placa_text);
+
         ciscenjeBaze();
         /*provjera da li je tablica s blagdanima prazna,
-        **ako je onda je punimo sa blagdanima,
-        * ako nije, onda možemo izračunati plaću
+        **ako je onda obavještavamo korisnika što trebamo napraviti i punimo tablicu
         */
-
-        if (!(new DBHelper(getApplicationContext()).checkHolidaysTable())){
-            Log.d("bugiranje","barem sam probao");
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-
-            alertDialogBuilder.setMessage("Aplikaciji treba pristupiti kalendaru kako bi točno računala plaću.");
-            alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    //provjeravamo da li je googlePlay usluga dostupna te punimo bazu
-                    if (isGooglePlayServicesAvailable()) {
-                        refreshResults();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Google Play Services required: " +
-                                "after installing, close and relaunch this app.", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-            alertDialogBuilder.show();
-        } else {
-            Log.d("bugiranje","ima neš čini se");
-        }
-
 
         pozicijaFragmenta = 1;
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -138,6 +118,7 @@ public class MainActivity extends ActionBarActivity
             @Override
             public void onPageSelected(int position) {
                 pozicijaFragmenta = position;
+                //Toast.makeText(getApplicationContext(), position + "", Toast.LENGTH_SHORT).show();
                 if (position == 0) {
                     flowButton.hide(true);
                 } else {
@@ -169,9 +150,34 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
-        //metode google calendara
+        initializeGoogleCalendarObjects();
+        /*
+        if (isGooglePlayServicesAvailable()) {
+            refreshResults();
+        } else {
+            Toast.makeText(getApplicationContext(), "Google Play Services required: " +
+                    "after installing, close and relaunch this app.", Toast.LENGTH_LONG).show();
+        }*/
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
-        // Initialize credentials and service object.
+        alertDialogBuilder.setMessage("Aplikaciji treba pristupiti kalendaru kako bi točno računala plaću.");
+        alertDialogBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //provjeravamo da li je googlePlay usluga dostupna te punimo bazu
+                if (isGooglePlayServicesAvailable()) {
+                    refreshResults();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Google Play Services required: " +
+                            "after installing, close and relaunch this app.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        alertDialogBuilder.show();
+
+    }
+    // Initialize credentials and service object.
+    private void initializeGoogleCalendarObjects(){
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
         credential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
@@ -180,21 +186,20 @@ public class MainActivity extends ActionBarActivity
 
         mService = new com.google.api.services.calendar.Calendar.Builder(
                 transport, jsonFactory, credential)
-                .setApplicationName("Google Calendar API Android Quickstart")
+                .setApplicationName("McPare")
                 .build();
-
-
     }
 
-    /*!treba biti async*/
     private void ciscenjeBaze() {
 
         Calendar currentDate = Calendar.getInstance();
         currentDate.setTime(new Date());
         if (currentDate.get(Calendar.DAY_OF_MONTH) == 1){
-            DBHelper helper = new DBHelper(getApplicationContext());
+            //DBHelper helper = new DBHelper(getApplicationContext());
             currentDate.add(Calendar.MONTH, -1);
-            helper.deleteAllFromPosaoToDate(currentDate.getTimeInMillis());
+            //helper.deleteAllFromPosaoToDate(currentDate.getTimeInMillis());
+            CleanDBTask dbTask = new CleanDBTask(getApplicationContext());
+            dbTask.execute(currentDate.getTimeInMillis());
 
         }
     }
@@ -208,12 +213,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -229,9 +229,14 @@ public class MainActivity extends ActionBarActivity
         DialogFragment dialog = new RadnoVrijemeDialog();
 
         Bundle args = new Bundle();
-        args.putInt("fragment", pozicijaFragmenta);
+        Date currentDate = new Date();
+        if (pozicijaFragmenta == 1)
+        {
+            args.putLong("datum", currentDate.getTime());
+        }else {
+            args.putLong("datum", pocetakSljMjeseca(currentDate.getTime()));
+        }
         dialog.setArguments(args);
-
         dialog.show(getSupportFragmentManager(), "TAG1");
     }
 
@@ -252,25 +257,25 @@ public class MainActivity extends ActionBarActivity
         DialogFragment dialog = new RadnoVrijemeDialog();
         Bundle args = new Bundle();
         args.putLong("datum", datumUMs);
-        args.putInt("fragment", pozicijaFragmenta);
         dialog.setArguments(args);
         dialog.show(getSupportFragmentManager(), "Dialog");
     }
 
     @Override
     public void saljiPodatke(String pozicija, String pocetak, String kraj, Date currentDate) {
-        long startDate = dateGetter(currentDate, pocetak);
-        long endDate = dateGetter(currentDate, kraj);
-
-        Posao posao = new Posao(pozicija, getIdOfPosition(pozicija), startDate, endDate);
+        //long startDate = dateGetter(currentDate, pocetak);
+        //long endDate = dateGetter(currentDate, kraj);
+        Long[] beginingAndEnd = beginingAndEndDate(currentDate, pocetak, kraj);
+        //Posao posao = new Posao(pozicija, getIdOfPosition(pozicija), startDate, endDate);
+        Posao posao = new Posao(pozicija, getIdOfPosition(pozicija), beginingAndEnd[0], beginingAndEnd[1]);
         DBHelper helper = new DBHelper(getApplicationContext());
-        helper.insertJob(posao);
+        long idPosla = helper.insertJob(posao);
 
 
-        if (krajMjeseca() > startDate)
+        if (krajMjeseca() > beginingAndEnd[0])
         {
             FragmentTrenutni fragment;
-            fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(1);
             fragment.dodajURecycler(posao);
         }else {
             FragmentSljedeci fragment;
@@ -278,12 +283,28 @@ public class MainActivity extends ActionBarActivity
             fragment.dodajURecycler(posao);
         }
 
+        Calendar today = Calendar.getInstance();
+        if (today.getTimeInMillis() > beginingAndEnd[1]){
+            pozoviRacunanje(idPosla);
+        }
+
+    }
+
+    private void pozoviRacunanje(Long id) {
+
+        String satiTekst = sati_text.getText().toString();
+        String placaTekst = placa_text.getText().toString();
+        Double sati = Double.parseDouble(satiTekst.substring(0, satiTekst.indexOf(" h")));
+        Double placa = Double.parseDouble( placaTekst.substring(0, placaTekst.indexOf(" kn")) );
+        RacunanjeTask racunanjeTask = new RacunanjeTask(this);
+        racunanjeTask.execute(placa, sati, id.doubleValue());
+
+
     }
 
     @Override
     public void brisanje(int position, Posao posao) {
         DBHelper helper = new DBHelper(getApplicationContext());
-        //Log.v("lukas", "" +posao.getId());
         helper.deleteJob(posao.getId());
         if (pozicijaFragmenta == 1){
             FragmentTrenutni fragment;
@@ -299,25 +320,34 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void updatePodataka(String pozicija, String pocetak, String kraj, Date currentDate, int position, int idPosla) {
         DBHelper helper = new DBHelper(getApplicationContext());
+
+        Long[] beginingAndEnd = beginingAndEndDate(currentDate, pocetak, kraj);
         Posao newPosao = new Posao(pozicija, getIdOfPosition(pozicija),
-                        dateGetter(currentDate, pocetak),
-                        dateGetter(currentDate, kraj));
+                beginingAndEnd[0],
+                beginingAndEnd[1]);
         newPosao.setId(idPosla);
         helper.updateRow(newPosao);
 
-        /*** trebalo bi se gledat ne koji je trenutno fragment nego koji pocetakDatum je u pitanju ***/
-
-
-
         if (pozicijaFragmenta == 1){
             FragmentTrenutni fragment;
-            fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
-            fragment.updateItemInRecycle(newPosao, position);
+            fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(1);
+            fragment.izbrisiIzRecycler(position);
         }else if (pozicijaFragmenta == 2){
             FragmentSljedeci fragment;
-            fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
+            fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(2);
             fragment.izbrisiIzRecycler(position);
         }
+
+        if (beginingAndEnd[0] < krajMjeseca()){
+            FragmentTrenutni fragment2;
+            fragment2 = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(1);
+            fragment2.dodajURecycler(newPosao);
+        }else {
+            FragmentSljedeci fragment2;
+            fragment2 = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(2);
+            fragment2.dodajURecycler(newPosao);
+        }
+
     }
 
     private long dateGetter(Date currentDate, String pocetak){
@@ -337,9 +367,40 @@ public class MainActivity extends ActionBarActivity
         return  calendar.getTimeInMillis();
     }
 
+    private Long[] beginingAndEndDate(Date currentDate, String pocetak, String kraj){
+
+        Long[] vars;
+        Calendar begining = Calendar.getInstance();
+        Calendar ending = Calendar.getInstance();
+        begining.setTime(currentDate);
+        ending.setTime(currentDate);
+
+        String[] sati_i_minute_pocetka = pocetak.split(":");
+        String[] sati_i_minute_kraja = kraj.split(":");
+
+        begining.set(begining.get(Calendar.YEAR),
+                begining.get(Calendar.MONTH),
+                begining.get(Calendar.DAY_OF_MONTH),
+                Integer.parseInt(sati_i_minute_pocetka[0]),
+                Integer.parseInt(sati_i_minute_pocetka[1])
+        );
+
+        ending.set(ending.get(Calendar.YEAR),
+                ending.get(Calendar.MONTH),
+                ending.get(Calendar.DAY_OF_MONTH),
+                Integer.parseInt(sati_i_minute_kraja[0]),
+                Integer.parseInt(sati_i_minute_kraja[1])
+        );
+
+        if (begining.getTimeInMillis() > ending.getTimeInMillis())
+            ending.add(Calendar.MONTH, 1);
+        vars = new Long[]{begining.getTimeInMillis(), ending.getTimeInMillis()};
+        return vars;
+    }
+
+
     private int getIdOfPosition(String pozicija){
         DBHelper helper = new DBHelper(getApplicationContext());
-
         return  helper.getPositionId(pozicija);
     }
 
@@ -351,6 +412,12 @@ public class MainActivity extends ActionBarActivity
         return c.getTimeInMillis();
     }
 
+    private long pocetakSljMjeseca(long var) {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(var);
+        c.set(c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, 1, 0, 0, 0);
+        return c.getTimeInMillis();
+    }
 
     //funkcije google calendara
 
@@ -385,8 +452,9 @@ public class MainActivity extends ActionBarActivity
                                 getPreferences(Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
-                        editor.commit();
+                        editor.apply();
                     }
+                    refreshResults();
                 } else if (resultCode == RESULT_CANCELED) {
                     //mStatusText.setText("Account unspecified.");
                     Toast.makeText(getApplicationContext(), "Account unspecified.", Toast.LENGTH_SHORT).show();
@@ -408,13 +476,13 @@ public class MainActivity extends ActionBarActivity
      * user can pick an account.
      */
     private void refreshResults() {
+
         if (credential.getSelectedAccountName() == null) {
             chooseAccount();
         } else {
             if (isDeviceOnline()) {
-                new DownloadHolidaysTask(this).execute();
+                new DownloadHolidaysTask(MainActivity.this).execute();
             } else {
-                //mStatusText.setText("No network connection available.");
                 Toast.makeText(getApplicationContext(), "No network connection available.", Toast.LENGTH_LONG).show();
             }
         }
@@ -483,7 +551,8 @@ public class MainActivity extends ActionBarActivity
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                Log.d("lukas", message);
             }
         });
     }

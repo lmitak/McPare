@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -86,6 +87,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POZICIJA);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_POSAO);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_BLAGDANI);
         onCreate(sqLiteDatabase);
     }
 
@@ -109,9 +111,9 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
 
         String select_query = "SELECT * FROM " + TABLE_POSAO
-                            + " JOIN " + TABLE_POZICIJA + " ON " + COLUMN_POZICIJA_ID + " = " + COLUMN_ID_POZICIJE
-                            + " WHERE " + COLUMN_POCETAK + " BETWEEN " + pocetakMjeseca.getTimeInMillis() + " AND " + krajMjeseca.getTimeInMillis()
-                            + " ORDER BY " + COLUMN_POCETAK + " ASC";
+                + " JOIN " + TABLE_POZICIJA + " ON " + COLUMN_POZICIJA_ID + " = " + COLUMN_ID_POZICIJE
+                + " WHERE " + COLUMN_POCETAK + " BETWEEN " + pocetakMjeseca.getTimeInMillis() + " AND " + krajMjeseca.getTimeInMillis()
+                + " ORDER BY " + COLUMN_POCETAK + " ASC";
 
         Cursor c = db.rawQuery(select_query, null);
 
@@ -169,18 +171,20 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
     //dodavanje posla
-    public void insertJob(Posao p){
+    public long insertJob(Posao p){
         SQLiteDatabase db = getWritableDatabase();
+        long id;
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_POCETAK, p.getPocetak());
         values.put(COLUMN_KRAJ, p.getKraj());
         values.put(COLUMN_ID_POZICIJE, p.getPozicija().getId());
 
-        db.insert(TABLE_POSAO, null, values);
+        id = db.insert(TABLE_POSAO, null, values);
         db.close();
+        return  id;
     }
-
+    //brisanje posla
     public void deleteJob(int id){
         SQLiteDatabase db = getWritableDatabase();
         //Log.d("lukas", "id: " + id);
@@ -189,13 +193,13 @@ public class DBHelper extends SQLiteOpenHelper {
         db.delete(TABLE_POSAO, whereClause, null);
         db.close();
     }
-
+    //brisanje svih poslova
     public void deleteAllFromPosao(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("DELETE FROM " + TABLE_POSAO);
         db.close();
     }
-
+    //brisanje svih poslova do određenog datuma
     public void deleteAllFromPosaoToDate(long datum_proslog_mjeseca){
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -228,13 +232,18 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor c = db.query(TABLE_BLAGDANI, new String[]{COLUMN_ID_BLAGDANA}, null, null, null, null, null);
+        c.moveToFirst();
+        Log.d("lukas", "Broj redova u cursoru: " + c.getCount());
+        //ako nešđo ima vrati true
         if (c.getCount() > 1)
         {
+            c.close();
             db.close();
             return true;
         }
 
         else {
+            c.close();
             db.close();
             return false;
         }
@@ -258,13 +267,17 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         String select_query = "SELECT * FROM " + TABLE_POSAO
                 + " JOIN " + TABLE_POZICIJA + " ON " + COLUMN_POZICIJA_ID + " = " + COLUMN_ID_POZICIJE
-                + " WHERE " + COLUMN_POCETAK + " > " + now.getTime()
+                + " WHERE " + COLUMN_KRAJ + " < " + now.getTime()
                 + " ORDER BY " + COLUMN_POCETAK + " ASC";
         Cursor c = db.rawQuery(select_query, null);
         //db.rawQuery("SELECT " + COLUMN_POCETAK + " FROM " + TABLE_POSAO + " WHERE")
         if(c.moveToFirst()){
             do {
-                poslovi.add(new Posao());
+                Posao p = new Posao();
+                p.setId(c.getInt(c.getColumnIndex(COLUMN_ID)));
+                p.setPocetak(c.getLong(c.getColumnIndex(COLUMN_POCETAK)));
+                p.setKraj(c.getLong(c.getColumnIndex(COLUMN_KRAJ)));
+                poslovi.add(p);
             }while (c.moveToNext());
         }
         c.close();
@@ -286,6 +299,47 @@ public class DBHelper extends SQLiteOpenHelper {
         c.close();
         db.close();
         return datumiBlagdana;
+    }
+
+    public  List<Long> getAllHolidyas(){
+        List<Long> datumiBlagdana = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(TABLE_BLAGDANI, new String[]{COLUMN_DATUM_BLAGDANA}, null, null, null, null, null);
+        if(c.moveToFirst()){
+            do {
+                datumiBlagdana.add(c.getLong(c.getColumnIndex(COLUMN_DATUM_BLAGDANA)));
+            }while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+        return datumiBlagdana;
+    }
+
+    public void deleteHoliday(long date){
+        SQLiteDatabase db = getWritableDatabase();
+        String whereClause = COLUMN_DATUM_BLAGDANA + " = " + date;
+        db.delete(TABLE_BLAGDANI, whereClause, null);
+    }
+
+    public void insertHoliday(long date){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DATUM_BLAGDANA, date);
+        db.insert(TABLE_BLAGDANI, null, values);
+    }
+
+
+    public Posao getJobOnId(int id){
+        Posao p = new Posao();
+        SQLiteDatabase db = getReadableDatabase();
+        String whereClause = COLUMN_ID + "=" + id;
+        Cursor c = db.query(TABLE_POSAO, null, whereClause, null, null, null, null);
+        if (c.moveToFirst()){
+            p.setPocetak(c.getLong(c.getColumnIndex(COLUMN_POCETAK)));
+            p.setKraj(c.getLong(c.getColumnIndex(COLUMN_KRAJ)));
+            p.setId(id);
+        }
+        return p;
     }
 
 }
