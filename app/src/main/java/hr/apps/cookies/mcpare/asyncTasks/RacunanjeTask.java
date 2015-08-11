@@ -1,6 +1,5 @@
 package hr.apps.cookies.mcpare.asyncTasks;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -8,7 +7,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import hr.apps.cookies.mcpare.MainActivity;
@@ -23,51 +21,106 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
     private MainActivity mAcitivity;
     private DBHelper helper;
     private List<Long> listaBlagdana;
+    TextView sati_tv, placa_tv;
+    String placaTekst, satiTekst;
+    int idCurJob;
+    Posao tempPosao;
+    List<Posao> listaPoslova;
+    double operacija;
 
     public RacunanjeTask(MainActivity mAcitivity) {
         this.mAcitivity = mAcitivity;
     }
 
     @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        sati_tv = (TextView) mAcitivity.findViewById(R.id.sati_text);
+        placa_tv = (TextView) mAcitivity.findViewById(R.id.placa_text);
+
+        placaTekst = placa_tv.getText().toString();
+        satiTekst = sati_tv.getText().toString();
+
+        this.idCurJob = mAcitivity.idTrenutnogPosla;
+        if (idCurJob != -1){
+            Log.d("taskoviRac", "id je postavljen");
+            helper = new DBHelper(mAcitivity.getApplicationContext());
+            tempPosao = helper.getJobOnId(idCurJob);
+        }else {
+            tempPosao = null;
+        }
+
+    }
+
+    @Override
     protected void onPostExecute(Double[] aDouble) {
         for (Double d:aDouble){
-            Log.d("taskovi", "post: " + d.toString());
+            Log.d("taskoviPosta", "post: " + d.toString());
         }
-        TextView sati_tv = (TextView) mAcitivity.findViewById(R.id.sati_text);
-        TextView placa_tv = (TextView) mAcitivity.findViewById(R.id.placa_text);
+        //TextView sati_tv = (TextView) mAcitivity.findViewById(R.id.sati_text);
+        //TextView placa_tv = (TextView) mAcitivity.findViewById(R.id.placa_text);
         sati_tv.setText(aDouble[1].toString() + " h");
         placa_tv.setText(aDouble[0].toString() + " kn");
+
+        if (operacija == 2.0){
+            helper = new DBHelper(mAcitivity.getApplicationContext());
+            tempPosao = mAcitivity.updatePosao;
+            helper = new DBHelper(mAcitivity.getApplicationContext());
+            helper.updateRow(tempPosao);
+            mAcitivity.idTrenutnogPosla = tempPosao.getId();
+            new RacunanjeTask(this.mAcitivity).execute(0.0);
+        }else {
+            mAcitivity.idTrenutnogPosla = -1;
+        }
     }
 
     @Override
     protected Double[] doInBackground(Double... doubles) {
         Log.d("taskovi", "Racunanje se pokrenulo");
-        double pocetnaVrijednost = doubles[0];
 
+        double pocetnoSati = Double.parseDouble(satiTekst.substring(0, satiTekst.indexOf(" h")));
+        double pocetnoPlaca = Double.parseDouble( placaTekst.substring(0, placaTekst.indexOf(" kn")) );
+        helper = new DBHelper(mAcitivity.getApplicationContext());
         /* Ako je pocetna vrijednost 0, to znaci da placa jos nikad nije racunata
         ** Ako je placa veca od 0, to znaci da je se samo treba uvecati za odredjenu vrijednost
         * koja se nalazi u jednom poslu
-        * u async task šaljemo vrijednost koja je već izracunata, ako je nema onda je 0;
-        * ako nije 0, onda uz nju šaljemo i odrađene sate, id posla
          */
-        /*gore navedeno je upitno za izradu, korisnik neće unosit posao koji već radi, nego
-        * unaprijed*/
         for (Double d : doubles){
             Log.d("taskovi", d.toString());
         }
-        if (pocetnaVrijednost == 0){
+        listaPoslova = new ArrayList<>();
+        if (pocetnoSati == 0){
+            listaPoslova = helper.getAllJobsTillNow();
             return racunaj();
         }else {
-            return racunaj(doubles[0], doubles[1], doubles[2]);
+            if (tempPosao == null){
+                //return racunaj(pocetnoSati, pocetnoPlaca, doubles[1]);
+                Log.d("taskoviRac", "Trenutni posao je null");
+                return new Double[]{pocetnoPlaca, pocetnoSati};
+            }else {
+                listaPoslova.add(tempPosao);
+                Calendar pp = Calendar.getInstance();
+                pp.setTimeInMillis(tempPosao.getPocetak());
+                Calendar pr = Calendar.getInstance();
+                pr.setTimeInMillis(tempPosao.getKraj());
+                Log.d("taskoviRac", "Trenutni ima placu: " + pocetnoPlaca + " i sate: " + pocetnoSati
+                        + "\nI posao ima pocetak u: " + pp.get(Calendar.HOUR_OF_DAY)
+                        + " i kraj u: " + pr.get(Calendar.HOUR_OF_DAY) + " i operacija je " + doubles[0]);
+                this.operacija = doubles[0];
+                return racunaj(pocetnoPlaca, pocetnoSati, operacija);
+            }
+            //return racunaj(pocetnoSati, pocetnoPlaca, doubles[0], doubles[1]);
         }
     }
 
     private Double[] racunaj(Double... params) {
 
+        // operacija varijabla predstavlja koja operacija ce se izvrsavat (0 - zbroj, 1 - razlika, 2 - razlika, pa operacija po želji )
+        double operacija = 0;
         double iznos;
         double sati;
-        List<Posao> listaPoslova = new ArrayList<>();
-        helper = new DBHelper(mAcitivity.getApplicationContext());
+
+        //helper = new DBHelper(mAcitivity.getApplicationContext());
         listaBlagdana = helper.getAllHolidaysTillNow();
 
         SharedPreferences sp =
@@ -83,36 +136,54 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
         if (params.length > 0){
             iznos = params[0];
             sati = params[1];
-            listaPoslova.add(helper.getJobOnId(params[2].intValue()));
+            //listaPoslova.add(helper.getJobOnId(params[2].intValue()));
+            if (params[2] > 0){
+                operacija = 1;
+            }
         }else {
             iznos = 0;
             sati = 0;
-            listaPoslova = helper.getAllJobsTillNow();
         }
         Log.d("taskovi", "Kol. poslova: " + listaPoslova.size());
 
         for (Posao p : listaPoslova){
-            sati += radniSati(p.getPocetak(), p.getKraj());
-
+            Log.d("taskoviPosao", "Posao: \n" + "Pocetak: " + p.getPocetak() + "\tKraj: " + p.getKraj()
+                + "\nPozicija: " + p.getPozicija_id());
+            //sati += radniSati(p.getPocetak(), p.getKraj());
+            sati = (operacija == 0) ? (sati + radniSati(p.getPocetak(), p.getKraj()))
+                    : (sati - radniSati(p.getPocetak(), p.getKraj()));
+            Log.d("taskovi", "sati je " + sati + " jer smo racunali sa " + radniSati(p.getPocetak(), p.getKraj()));
             //komentar uvjeta se nalazi ispod njega
             if (isHoliday(p.getPocetak()) && isHoliday(p.getKraj())){
                 //ako počinje i završava radni dan cijeli u blagdan smjeni (u blagdan uvjet treba ubacit i nedelju)
                 if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                     //ako počinje i završava radni dan cijeli u noćnoj smjeni istog blagdana
-                    iznos += blagdan_nocna * radniSati(p.getPocetak(), p.getKraj());
-
+                    //iznos += blagdan_nocna * radniSati(p.getPocetak(), p.getKraj());
+                    iznos = (operacija == 0) ? (iznos +  blagdan_nocna * radniSati(p.getPocetak(), p.getKraj()))
+                            : (iznos -  blagdan_nocna * radniSati(p.getPocetak(), p.getKraj()));
                 }else if(isNocna(p.getPocetak())) {
                     //ako započinje u noćnoj praznika i sutradan je ponovo praznik
-                    iznos += blagdan_nocna * pocetakUNocnojNocniSati(p.getPocetak())
-                            + blagdan * pocetakUNocnojDnevniSati(p.getKraj());
+                    //iznos += blagdan_nocna * pocetakUNocnojNocniSati(p.getPocetak())
+                    //        + blagdan * pocetakUNocnojDnevniSati(p.getKraj());
+                    iznos = (operacija == 0) ?
+                            (iznos + (blagdan_nocna * pocetakUNocnojNocniSati(p.getPocetak())
+                            + blagdan * pocetakUNocnojDnevniSati(p.getKraj())))
+                            : (iznos - (blagdan_nocna * pocetakUNocnojNocniSati(p.getPocetak())
+                            + blagdan * pocetakUNocnojDnevniSati(p.getKraj())));
                 }else if (isNocna(p.getKraj())){
                     //da li završava barem u noćnoj
                     //počinje na blagdan, u dnevnoj smjeni i završavamo za vrijeme noćne (istog dana)
-                    iznos += blagdan * pocetakUDnevnojDnevniSati(p.getPocetak()) +
-                            blagdan_nocna * pocetakUDnevnojNocniSati(p.getKraj());
-
+                    //iznos += blagdan * pocetakUDnevnojDnevniSati(p.getPocetak()) +
+                    //        blagdan_nocna * pocetakUDnevnojNocniSati(p.getKraj());
+                    iznos = (operacija == 0) ?
+                            (iznos + ( blagdan * pocetakUDnevnojDnevniSati(p.getPocetak())
+                                    + blagdan_nocna * pocetakUDnevnojNocniSati(p.getKraj()) ))
+                            : (iznos - ( blagdan * pocetakUDnevnojDnevniSati(p.getPocetak())
+                            + blagdan_nocna * pocetakUDnevnojNocniSati(p.getKraj()) ));
                 }else {//cijeli posao mu je po danu
-                    iznos += blagdan * radniSati(p.getPocetak(), p.getKraj());
+                    //iznos += blagdan * radniSati(p.getPocetak(), p.getKraj());
+                    iznos = (operacija == 0) ? (iznos + blagdan * radniSati(p.getPocetak(), p.getKraj()))
+                            : (iznos - blagdan * radniSati(p.getPocetak(), p.getKraj()));
                 }
             }else if (isHoliday(p.getPocetak())){
                 //ako počinje raditi za vrijeme blagdana, ali se nastavlja na sutradan
@@ -122,8 +193,13 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                         //ako počinje i završava radni dan cijeli u noćnoj smjeni i sutradan nije praznik, nego nedjelja
                         //pošto je uvijet prošao vrijednost ne može biti manja ili veća od opsega noćne
                         //ne može početi prije 22 i završiti nakon 6
-                        iznos += blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
-                                + ned_nocna * zavrsavaNaDanSati(p.getKraj());
+                        //iznos += blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
+                        //        + ned_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ?
+                                (iznos + (blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
+                                        + ned_nocna * zavrsavaNaDanSati(p.getKraj())))
+                                : (iznos -(blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
+                                + ned_nocna * zavrsavaNaDanSati(p.getKraj())));
                     }else if(isNocna(p.getPocetak())){
                         //ako počinje na dan koji je blagdan i nastavlja raditi sutradan kada uje nedjelja i radi dalje
                         // od kraja nocne smjene
@@ -131,15 +207,17 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                          * za vrijeme nedjelje
                          * Pošto radi sigurno iznad vremena noćne smjene, to znači da je sigurno odradio od
                          * ponoći do 6, nakon toga se samo zbroji ostatak*/
-                        iznos += blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var = blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
                                 + ned_nocna * 6
                                 + nedjeljna * (zavrsavaNaDanSati(p.getKraj()) - 6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getKraj())){
                         //ako počinje raditi na blagdan u dnevnim satima
                         // i završava sutradan na nedjelju u noćnoj smjeni (do 6)
-                        iznos += blagdan * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= blagdan * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + blagdan_nocna * 2
                                 + ned_nocna * (zavrsavaNaDanSati(p.getKraj()));
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //ako se prelazi iz dana u dan, onda mora jedan dio  biti noćni
                         // uvijet nepotreban
@@ -149,8 +227,9 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //ako počinje i završava radni dan cijeli u noćnoj smjeni i sutradan nije praznik
                         //pošto je uvijet prošao vrijednost ne može biti manja ili veća od opsega noćne
-                        iznos += blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
                                 + nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
 
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje raditi u noćnoj blagdana, ali nastavlja se na sutradan (koji nije blagdan)
@@ -159,15 +238,17 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                     * Pošto radi sigurno iznad vremena noćne smjene, to znači da je sigurno odradio od
                     * ponoći do 6, nakon toga se samo zbroji ostatak*/
 
-                        iznos += blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= blagdan_nocna * pocinjeNaDanSati(p.getPocetak())
                                 + nocna * 6
                                 + dnevna * (zavrsavaNaDanSati(p.getKraj()) - 6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getKraj())){
                         //ako počinje raditi na blagdan u dnevnim satima
                         // i završava sutradan na radni dan u noćnoj smjeni (do 6)
-                        iznos += blagdan * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= blagdan * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + blagdan_nocna * 2
                                 + nocna * (zavrsavaNaDanSati(p.getKraj()));
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //ako se prelazi iz dana u dan, onda mora jedan dio  biti noćni
                         // uvijet nepotreban
@@ -180,20 +261,23 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //ako počinje raditi dan prije blagdana  u noćnoj(koji je nedjelja)
                         // i završava u noćnoj sutradan kada je blagdan(do 6 dakle)
-                        iznos += ned_nocna * pocinjeNaDanSati(p.getPocetak()) +
+                        double var= ned_nocna * pocinjeNaDanSati(p.getPocetak()) +
                                 blagdan_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje raditi dan prije blagdana u noćnoj(koji je nedjelja)
                         // i završava sutradan iza noćne
-                        iznos += ned_nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= ned_nocna * pocinjeNaDanSati(p.getPocetak())
                                 + blagdan_nocna * 6
                                 + blagdan * (zavrsavaNaDanSati(p.getPocetak()) -6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if(isNocna(p.getKraj())){
                         //ako počinje raditi u dnevnoj smjeni nedjelje prije blagdana i nastavlja
                         //raditi do sutradana, ali završava do 6
-                        iznos += nedjeljna * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= nedjeljna * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + ned_nocna * 2
                                 + blagdan_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //ako se prelazi iz dana u dan, onda mora jedan dio  biti noćni
                         // uvijet nepotreban
@@ -203,63 +287,71 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //ako počinje raditi dan prije blagdana  u noćnoj(koji nije blagdan ni nedjelja)
                         // i završava u noćnoj sutradan kada je blagdan(do 6 dakle)
-                        iznos += nocna * pocinjeNaDanSati(p.getPocetak()) +
+                        double var= nocna * pocinjeNaDanSati(p.getPocetak()) +
                                 blagdan_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje raditi dan prije blagdana u noćnoj(koji je radni)
                         // i završava sutradan iza noćne
-                        iznos += nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= nocna * pocinjeNaDanSati(p.getPocetak())
                                 + blagdan_nocna * 6
                                 + blagdan * (zavrsavaNaDanSati(p.getPocetak()) -6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if(isNocna(p.getKraj())){
                         //ako počinje raditi u dnevnoj smjeni nedjelje prije radnog dana i nastavlja
                         //raditi do sutradana, ali završava do 6
-                        iznos += dnevna * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= dnevna * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + nocna * 2
                                 + blagdan_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //ako se prelazi iz dana u dan, onda mora jedan dio  biti noćni
                         // uvijet nepotreban
                     }
                 }
             }else {
-                Log.d("taskovi", "barem do tu(nedjelja ili radni dan)");
                 //niti ne počinje niti ne završava na blagdan
                 if (isSunday(p.getPocetak()) && isSunday(p.getKraj())){
                     //ako počinje i završava na nedjelju
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //da li u nedjelju radi noćnu od 22 do 24
                         //ili od 0 do 6
-                        iznos += ned_nocna * radniSati(p.getPocetak(), p.getKraj());
+                        double var= ned_nocna * radniSati(p.getPocetak(), p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje u noćnoj i završava u dnevnoj, onda prelazi u drugi dan, što više nije nedjelja
                         //nepotreban uvijet
                     }else if (isNocna(p.getKraj())){
                         //ako počinje raditi u dnevnoj nedjelje i radi noćnu do 24
-                        iznos += nedjeljna * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= nedjeljna * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + ned_nocna * pocetakUDnevnojNocniSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //sve radi u dnevnoj smjeni nedjelje
-                        iznos += nedjeljna * radniSati(p.getPocetak(), p.getKraj());
+                        double var= nedjeljna * radniSati(p.getPocetak(), p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }
                 }else if (isSunday(p.getPocetak())){
                     //ako počinje raditi u nedjelju ali završava na radni dan
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //ako počinje počinje raditi u noćnoj nedjelje
                         //i nastavlja u noćnoj slj. dana
-                        iznos += ned_nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= ned_nocna * pocinjeNaDanSati(p.getPocetak())
                                 + nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje raditi u noćnoj nedjelje
                         //i nsatavi raditi u slj. danu dalje od noćne
-                        iznos += ned_nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= ned_nocna * pocinjeNaDanSati(p.getPocetak())
                                 + nocna * 6
                                 + dnevna * (zavrsavaNaDanSati(p.getKraj())-6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getKraj())){
                         //ako počinje raditi u dnevnoj nedjelje i radi noćnu iza 24, te prelazi u drugi dan
-                        iznos += nedjeljna * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= nedjeljna * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + ned_nocna * 2
                                 + nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //ako se prelazi iz dana u dan, onda mora jedan dio  biti noćni
                         // uvijet nepotreban
@@ -269,45 +361,52 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //ako počinje počinje raditi u noćnoj radnog dana
                         //i nastavlja u noćnoj slj. dana (nedjelje)
-                        iznos += nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= nocna * pocinjeNaDanSati(p.getPocetak())
                                 + ned_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje raditi u noćnoj radnog dana
                         //i nsatavi raditi u slj. danu (nedjelji) dalje od noćne
-                        iznos += nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= nocna * pocinjeNaDanSati(p.getPocetak())
                                 + ned_nocna * 6
                                 + nedjeljna * (zavrsavaNaDanSati(p.getKraj())-6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getKraj())){
                         //ako počinje raditi u dnevnoj radnog dana i radi noćnu iza 24, te prelazi u drugi dan (nedjelju)
-                        iznos += dnevna * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= dnevna * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + nocna * 2
                                 + ned_nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
                         //ako se prelazi iz dana u dan, onda mora jedan dio  biti noćni
                         // uvijet nepotreban
                     }
                 }else {
-                    Log.d("taskovi", "barem do tu(radni dan)");
+                    Log.d("taskoviD", "barem do tu(radni dan)");
                     //nije ni blagdan niti nedjelja (radni dan)
                     // niti ne počinje niti ne završava na nedjelju ulu blagdan
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
                         //ako počinje i završava u noćnoj radnog dana
-                        iznos += nocna * radniSati(p.getPocetak(), p.getKraj());
+                        double var= nocna * radniSati(p.getPocetak(), p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getPocetak())){
                         //ako počinje raditi u noćnoj radnog dana
                         //i nsatavi raditi u slj. radnom danu dalje od noćne
-                        iznos += nocna * pocinjeNaDanSati(p.getPocetak())
+                        double var= nocna * pocinjeNaDanSati(p.getPocetak())
                                 + nocna * 6
                                 + dnevna * (zavrsavaNaDanSati(p.getKraj())-6);
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else if (isNocna(p.getKraj())){
                         //ako počinje raditi u dnevnoj radnog dana i radi noćnu iza 24, te prelazi u drugi dan (nedjelju)
-                        iznos += dnevna * pocetakUDnevnojDnevniSati(p.getPocetak())
+                        double var= dnevna * pocetakUDnevnojDnevniSati(p.getPocetak())
                                 + nocna * 2
                                 + nocna * zavrsavaNaDanSati(p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
-                        Log.d("taskovi", "dnevni radni dan");
+                        Log.d("taskoviD", "dnevni radni dan");
                         //ako počinje i završava u dnevnoj
-                        iznos += dnevna * radniSati(p.getPocetak(), p.getKraj());
+                        double var = dnevna * radniSati(p.getPocetak(), p.getKraj());
+                        iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }
                 }
             }
@@ -329,7 +428,7 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
         pocetak.setTimeInMillis(pocetak_rada);
         Calendar kraj = Calendar.getInstance();
         kraj.setTimeInMillis(kraj_rada);
-
+        Log.d("taskoviSati", "pocetak rada je: " + pocetak.get(Calendar.HOUR_OF_DAY) + ", a kraj je: " + kraj.get(Calendar.HOUR_OF_DAY));
 
         //ako su sati normalni (nrp. od 12 do 16 => 16-12 = 4h)
         //ako nisu onda povecaj za 24h kraj (npr. od 22 do 6 => (6+24) - 22 = 8h)

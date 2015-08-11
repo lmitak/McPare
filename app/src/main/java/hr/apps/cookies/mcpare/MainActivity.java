@@ -36,7 +36,6 @@ import com.google.api.services.calendar.CalendarScopes;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Map;
 
 import hr.apps.cookies.mcpare.adapters.PagerAdapter;
 import hr.apps.cookies.mcpare.asyncTasks.CleanDBTask;
@@ -65,6 +64,10 @@ public class MainActivity extends ActionBarActivity
     TextView sati_text, placa_text;
     int pozicijaFragmenta;
 
+    /*varijable za brže računanje satnice i plaće kod brisanja i update-a (bar se nadam)*/
+    public Posao updatePosao;
+    public int idTrenutnogPosla;
+
     //stvari od GoogleCalendar-a
     com.google.api.services.calendar.Calendar mService;
 
@@ -84,6 +87,8 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        idTrenutnogPosla = -1;
 
         sati_text = (TextView) findViewById(R.id.sati_text);
         placa_text = (TextView) findViewById(R.id.placa_text);
@@ -265,8 +270,11 @@ public class MainActivity extends ActionBarActivity
     public void saljiPodatke(String pozicija, String pocetak, String kraj, Date currentDate) {
         Long[] beginingAndEnd = beginingAndEndDate(currentDate, pocetak, kraj);
         Posao posao = new Posao(pozicija, getIdOfPosition(pozicija), beginingAndEnd[0], beginingAndEnd[1]);
+
         DBHelper helper = new DBHelper(getApplicationContext());
         long idPosla = helper.insertJob(posao);
+
+        posao.setId((int)idPosla);
 
         if (krajMjeseca() > beginingAndEnd[0])
         {
@@ -282,26 +290,42 @@ public class MainActivity extends ActionBarActivity
         Calendar today = Calendar.getInstance();
         if (today.getTimeInMillis() > beginingAndEnd[1]){
             Log.d("lukas", "prosao uvjet");
-            pozoviRacunanje(idPosla);
+            //pozoviRacunanje(idPosla, 0);
+            idTrenutnogPosla =  (int)idPosla;
+            //new RacunanjeTask(this).execute(0.0);
+            new RacunanjeTask(this).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, 0.0);
         }
 
     }
 
-    private void pozoviRacunanje(Long id) {
+    //operacija:
+    //0 = dodaj
+    //1 = smanji
+    /*private void pozoviRacunanje(Long id, double operacija) {
 
         String satiTekst = sati_text.getText().toString();
         String placaTekst = placa_text.getText().toString();
         Double sati = Double.parseDouble(satiTekst.substring(0, satiTekst.indexOf(" h")));
         Double placa = Double.parseDouble( placaTekst.substring(0, placaTekst.indexOf(" kn")) );
         RacunanjeTask racunanjeTask = new RacunanjeTask(this);
-        racunanjeTask.execute(placa, sati, id.doubleValue());
+        racunanjeTask.execute(placa, sati, id.doubleValue(), operacija);
 
 
-    }
+    }*/
 
     @Override
     public void brisanje(int position, Posao posao) {
         DBHelper helper = new DBHelper(getApplicationContext());
+
+        Calendar today = Calendar.getInstance();
+
+        if (today.getTimeInMillis() > posao.getKraj()){
+            Log.d("lukas", "prosao uvjet");
+            //pozoviRacunanje((long) posao.getId(), 1);
+            idTrenutnogPosla = posao.getId();
+            new RacunanjeTask(this).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, 1.0);
+        }
+
         helper.deleteJob(posao.getId());
         if (pozicijaFragmenta == 1){
             FragmentTrenutni fragment;
@@ -312,6 +336,7 @@ public class MainActivity extends ActionBarActivity
             fragment = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
             fragment.izbrisiIzRecycler(position);
         }
+
     }
 
     @Override
@@ -323,7 +348,19 @@ public class MainActivity extends ActionBarActivity
                 beginingAndEnd[0],
                 beginingAndEnd[1]);
         newPosao.setId(idPosla);
-        helper.updateRow(newPosao);
+
+        Calendar today = Calendar.getInstance();
+        Posao oldPosao = helper.getJobOnId(idPosla);
+
+        if (today.getTimeInMillis() > oldPosao.getKraj()){
+            Log.d("lukas", "prosao uvjet");
+            //pozoviRacunanje((long) idPosla, 1);
+            idTrenutnogPosla = oldPosao.getId();
+            updatePosao = newPosao;
+            new RacunanjeTask(this).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, 2.0);
+        }
+
+        //helper.updateRow(newPosao);
 
         if (pozicijaFragmenta == 1){
             FragmentTrenutni fragment;
@@ -344,6 +381,15 @@ public class MainActivity extends ActionBarActivity
             fragment2 = (FragmentSljedeci) pagerAdapter.getFragmentAtPosition(2);
             fragment2.dodajURecycler(newPosao);
         }
+
+        /*
+        if (today.getTimeInMillis() > newPosao.getKraj()){
+            Log.d("lukas", "prosao uvjet");
+            idTrenutnogPosla = newPosao.getId();
+            new RacunanjeTask(this).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, 0.0);
+        }*/
+
+
 
     }
 

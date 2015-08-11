@@ -174,7 +174,8 @@ public class DBHelper extends SQLiteOpenHelper {
     public long insertJob(Posao p){
         SQLiteDatabase db = getWritableDatabase();
         long id;
-
+        Log.d("taskoviRac", "Posao: id = " + p.getId() + ", pocetak: " + p.getPocetak()
+            + ", kraj: " + p.getKraj());
         ContentValues values = new ContentValues();
         values.put(COLUMN_POCETAK, p.getPocetak());
         values.put(COLUMN_KRAJ, p.getKraj());
@@ -182,6 +183,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         id = db.insert(TABLE_POSAO, null, values);
         db.close();
+        Log.d("taskoviRac", "a sad je id= " + id);
         return  id;
     }
     //brisanje posla
@@ -301,20 +303,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return datumiBlagdana;
     }
 
-    public  List<Long> getAllHolidyas(){
-        List<Long> datumiBlagdana = new ArrayList<>();
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE_BLAGDANI, new String[]{COLUMN_DATUM_BLAGDANA}, null, null, null, null, null);
-        if(c.moveToFirst()){
-            do {
-                datumiBlagdana.add(c.getLong(c.getColumnIndex(COLUMN_DATUM_BLAGDANA)));
-            }while (c.moveToNext());
-        }
-        c.close();
-        db.close();
-        return datumiBlagdana;
-    }
-
     public void deleteHoliday(long date){
         SQLiteDatabase db = getWritableDatabase();
         String whereClause = COLUMN_DATUM_BLAGDANA + " = " + date;
@@ -334,12 +322,20 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         String whereClause = COLUMN_ID + "=" + id;
         Cursor c = db.query(TABLE_POSAO, null, whereClause, null, null, null, null);
-        if (c.moveToFirst()){
+        if (c.getCount() > 0){
+            c.moveToFirst();
             p.setPocetak(c.getLong(c.getColumnIndex(COLUMN_POCETAK)));
             p.setKraj(c.getLong(c.getColumnIndex(COLUMN_KRAJ)));
             p.setId(id);
+            p.setPozicija_id(c.getInt(c.getColumnIndex(COLUMN_ID_POZICIJE)));
+            c.close();
+            db.close();
+            return p;
+        }else {
+            c.close();
+            db.close();
+            return null;
         }
-        return p;
     }
 
 }

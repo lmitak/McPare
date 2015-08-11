@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import hr.apps.cookies.mcpare.R;
 import hr.apps.cookies.mcpare.data.CalculationHelper;
@@ -61,10 +62,10 @@ public class EditDialog extends DialogFragment {
         positionSpinner.setAdapter(adapter);
 
         final EditText pocetakET = (EditText)view.findViewById(R.id.pocetak_tp);
-        //pocetakET.setText(zapis.getDatum_od().toString());
         final EditText krajET = (EditText)view.findViewById(R.id.kraj_tp);
         pocetakET.setText(timeFormat.format(new java.util.Date(posao.getPocetak())));
         krajET.setText(timeFormat.format(new java.util.Date(posao.getKraj())));
+
 
         final EditText trenutniDatumET = (EditText) view.findViewById(R.id.trenutniDatumTv);
         trenutniDatumET.setText(dateFormat.format(new java.util.Date(posao.getPocetak())));
@@ -116,7 +117,7 @@ public class EditDialog extends DialogFragment {
 
     public interface EditDialogComunicator{
         public void brisanje(int position, Posao posao);
-        public void updatePodataka(String pozicija, String pocetak, String kraj, java.util.Date currentDate, int position, int idPosla);
+        public void updatePodataka(String pozicija, String pocetak, String kraj, Date currentDate, int position, int idPosla);
     }
 
 

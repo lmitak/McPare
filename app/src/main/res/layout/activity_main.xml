@@ -68,7 +68,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="312 h"
+                android:text="0 h"
                 android:id="@+id/sati_text"
                 android:textSize="18sp"
                 android:paddingTop="6dp"
@@ -101,7 +101,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5150 kn"
+                android:text="0 kn"
                 android:id="@+id/placa_text"
                 android:textSize="18sp"
                 android:paddingTop="6dp"
