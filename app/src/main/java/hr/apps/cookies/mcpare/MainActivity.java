@@ -59,7 +59,6 @@ import hr.apps.cookies.mcpare.tabs.SlidingTabLayout;
 public class MainActivity extends ActionBarActivity
         implements FragmentTrenutni.FragmentTrenutniComunicator,
         FragmentSljedeci.FragmentSljedeciComunicator,
-        //FragmentProsli.FragmentProsliComunicator,
         RadnoVrijemeDialog.DialogComunicator,
         EditDialog.EditDialogComunicator{
 
@@ -176,13 +175,7 @@ public class MainActivity extends ActionBarActivity
         });
 
         initializeGoogleCalendarObjects();
-        /*
-        if (isGooglePlayServicesAvailable()) {
-            refreshResults();
-        } else {
-            Toast.makeText(getApplicationContext(), "Google Play Services required: " +
-                    "after installing, close and relaunch this app.", Toast.LENGTH_LONG).show();
-        }*/
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         alertDialogBuilder.setMessage("Aplikaciji treba pristupiti kalendaru kako bi točno računala plaću.");
