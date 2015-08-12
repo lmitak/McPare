@@ -116,9 +116,9 @@ public class MainActivity extends ActionBarActivity
 
         flowButton = (FloatingActionButton) findViewById(R.id.fab);
         //LinearLayout mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
-        /*
-        flowButton = new FloatingActionButton(getApplicationContext());
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+
+        //flowButton = new FloatingActionButton(getApplicationContext());
+        /*LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );

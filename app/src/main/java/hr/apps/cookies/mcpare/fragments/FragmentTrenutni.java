@@ -51,8 +51,6 @@ public class FragmentTrenutni extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        //DBHelper helper = new DBHelper(getActivity().getApplicationContext());
-        //podaci = helper.getAllJobsInMonth(new java.util.Date().getTime());
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
 
 
@@ -65,8 +63,6 @@ public class FragmentTrenutni extends Fragment {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-        //FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
-        //button.show(true);
 
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
         recyclerView.setTag("trenutni");
@@ -82,15 +78,6 @@ public class FragmentTrenutni extends Fragment {
                 })
         );
 
-        /*
-        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
-        addZapis.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                comunicator.startDialog();
-            }
-        });
-        */
         return layout;
     }
 
@@ -111,12 +98,6 @@ public class FragmentTrenutni extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    public void updateItemInRecycle(Posao p, int position){
-        podaci.add(position, p);
-        podaci.remove(position + 1);
-        Collections.sort(podaci);
-        adapter.notifyDataSetChanged();
-    }
     public void pozoviComunicator(){
         comunicator.startDialog();
     }

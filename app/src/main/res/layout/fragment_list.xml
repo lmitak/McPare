@@ -6,37 +6,11 @@
     tools:context="hr.apps.cookies.mcpare.fragments.FragmentTrenutni"
     android:orientation="vertical">
 
-    <!--
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/dodaj_zapis_text"
-        android:id="@+id/addZapis"
-        />
-    -->
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
     </android.support.v7.widget.RecyclerView>
-<!--
-    <com.github.clans.fab.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        fab:fab_colorNormal="@color/lightgreen"
-        fab:fab_colorPressed="@color/lightgreen"
-        fab:fab_colorRipple="@color/lightgreen"/>
--->
-<!--
-android:layout_gravity="bottom|right"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="8dp"
--->
 
 </LinearLayout>

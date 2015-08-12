@@ -47,12 +47,10 @@ public class FragmentSljedeci extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        //DBHelper helper = new DBHelper(getActivity().getApplicationContext());
+
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new java.util.Date());
         calendar.add(Calendar.MONTH,1);
-
-        //podaci = helper.getAllJobsInMonth(calendar.getTimeInMillis());
 
 
         View layout = inflater.inflate(R.layout.fragment_list, container, false);
@@ -66,10 +64,7 @@ public class FragmentSljedeci extends Fragment {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-/*
-        FloatingActionButton button = (FloatingActionButton) layout.findViewById(R.id.fab);
-        button.show(true);
-*/
+
         recyclerView = (RecyclerView) layout.findViewById(R.id.recycler);
         recyclerView.setTag("sljedeci");
         adapter = new RecyclerAdapter(getActivity(), podaci);
@@ -84,15 +79,6 @@ public class FragmentSljedeci extends Fragment {
                 })
         );
 
-        /*
-        Button addZapis = (Button) layout.findViewById(R.id.addZapis);
-        addZapis.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                comunicator.startDialog();
-            }
-        });
-        */
         return layout;
     }
 
@@ -109,13 +95,6 @@ public class FragmentSljedeci extends Fragment {
 
     public void izbrisiIzRecycler(int pozicija) {
         podaci.remove(pozicija);
-        adapter.notifyDataSetChanged();
-    }
-
-    public void updateItemInRecycle(Posao p, int position){
-        podaci.add(position, p);
-        podaci.remove(position + 1);
-        Collections.sort(podaci);
         adapter.notifyDataSetChanged();
     }
     public void pozoviComunicator(){
