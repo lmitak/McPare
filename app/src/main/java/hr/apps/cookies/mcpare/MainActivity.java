@@ -1,12 +1,14 @@
 package hr.apps.cookies.mcpare;
 
 import android.accounts.AccountManager;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -15,14 +17,19 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.*;
+import com.github.clans.fab.BuildConfig;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -108,6 +115,19 @@ public class MainActivity extends ActionBarActivity
         tabs = (SlidingTabLayout) findViewById(R.id.tabs);
 
         flowButton = (FloatingActionButton) findViewById(R.id.fab);
+        //LinearLayout mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
+        /*
+        flowButton = new FloatingActionButton(getApplicationContext());
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        flowButton.setButtonSize(FloatingActionButton.SIZE_NORMAL);
+        layoutParams.setMargins(0, -flowButton.getButtonSize(), (int)getPixels(8), 0);
+        flowButton.setLayoutParams(layoutParams);
+        mainLayout.addView(flowButton, 3);
+        */
+
         pagerAdapter = new PagerAdapter(getSupportFragmentManager(), getApplicationContext());
         pager.setAdapter(pagerAdapter);
         pager.setCurrentItem(1, true);
@@ -219,9 +239,9 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
-        }
+        }*/
         if (id == R.id.satnica){
             startActivity(new Intent(getApplicationContext(), SatniceActivity.class));
         }
@@ -588,5 +608,10 @@ public class MainActivity extends ActionBarActivity
         super.onResume();
         RacunanjeTask racunanjeTask = new RacunanjeTask(MainActivity.this);
         racunanjeTask.execute(0.0);
+    }
+
+    private double getPixels(int dp){
+        Resources r =  getResources();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
     }
 }

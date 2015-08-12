@@ -74,6 +74,39 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_marginTop="5dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Odustani"
+            android:id="@+id/btnOdustani"
+            style="?android:buttonBarButtonStyle"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Obriši"
+            android:id="@+id/btnRemove"
+            style="?android:buttonBarButtonStyle"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Spremi"
+            android:id="@+id/btnSave"
+            style="?android:buttonBarButtonStyle"/>
+
+
+    </LinearLayout>
+
 
 
 

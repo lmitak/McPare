@@ -57,8 +57,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
         for (Double d:aDouble){
             Log.d("taskoviPosta", "post: " + d.toString());
         }
-        //TextView sati_tv = (TextView) mAcitivity.findViewById(R.id.sati_text);
-        //TextView placa_tv = (TextView) mAcitivity.findViewById(R.id.placa_text);
         sati_tv.setText(aDouble[1].toString() + " h");
         placa_tv.setText(aDouble[0].toString() + " kn");
 
@@ -94,7 +92,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
             return racunaj();
         }else {
             if (tempPosao == null){
-                //return racunaj(pocetnoSati, pocetnoPlaca, doubles[1]);
                 Log.d("taskoviRac", "Trenutni posao je null");
                 return new Double[]{pocetnoPlaca, pocetnoSati};
             }else {
@@ -109,7 +106,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                 this.operacija = doubles[0];
                 return racunaj(pocetnoPlaca, pocetnoSati, operacija);
             }
-            //return racunaj(pocetnoSati, pocetnoPlaca, doubles[0], doubles[1]);
         }
     }
 
@@ -120,7 +116,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
         double iznos;
         double sati;
 
-        //helper = new DBHelper(mAcitivity.getApplicationContext());
         listaBlagdana = helper.getAllHolidaysTillNow();
 
         SharedPreferences sp =
@@ -132,7 +127,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
         double ned_nocna = Double.parseDouble(sp.getString("ned_nocna", "0"));
         double blagdan = Double.parseDouble(sp.getString("blagdan", "0"));
         double blagdan_nocna = Double.parseDouble(sp.getString("blagdan_nocna", "0"));
-        Log.d("taskovi", "satnica: " + dnevna);
         if (params.length > 0){
             iznos = params[0];
             sati = params[1];
@@ -382,7 +376,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                         // uvijet nepotreban
                     }
                 }else {
-                    Log.d("taskoviD", "barem do tu(radni dan)");
                     //nije ni blagdan niti nedjelja (radni dan)
                     // niti ne počinje niti ne završava na nedjelju ulu blagdan
                     if (isNocna(p.getPocetak()) && isNocna(p.getKraj())){
@@ -403,7 +396,6 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
                                 + nocna * zavrsavaNaDanSati(p.getKraj());
                         iznos = (operacija == 0) ? (iznos + var) : (iznos - var);
                     }else {
-                        Log.d("taskoviD", "dnevni radni dan");
                         //ako počinje i završava u dnevnoj
                         double var = dnevna * radniSati(p.getPocetak(), p.getKraj());
                         iznos = (operacija == 0) ? (iznos + var) : (iznos - var);

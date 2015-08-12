@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -30,6 +32,10 @@ public class EditDialog extends DialogFragment {
     EditDialogComunicator editComunicator;
     int position;
     Posao posao;
+    Button btnOdustani, btnSave, btnRemove;
+    EditText pocetakET, krajET, trenutniDatumET;
+
+    DateFormat dateFormat;
 
     public EditDialog() {
         super();
@@ -52,7 +58,7 @@ public class EditDialog extends DialogFragment {
             posao = bundle.getParcelable("posao");
         }
         DateFormat timeFormat = new SimpleDateFormat("HH:mm");
-        final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
 
         positionSpinner = (Spinner)view.findViewById(R.id.spinner);
@@ -61,19 +67,82 @@ public class EditDialog extends DialogFragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         positionSpinner.setAdapter(adapter);
 
-        final EditText pocetakET = (EditText)view.findViewById(R.id.pocetak_tp);
-        final EditText krajET = (EditText)view.findViewById(R.id.kraj_tp);
+        pocetakET = (EditText)view.findViewById(R.id.pocetak_tp);
+        krajET = (EditText)view.findViewById(R.id.kraj_tp);
         pocetakET.setText(timeFormat.format(new java.util.Date(posao.getPocetak())));
         krajET.setText(timeFormat.format(new java.util.Date(posao.getKraj())));
 
 
-        final EditText trenutniDatumET = (EditText) view.findViewById(R.id.trenutniDatumTv);
+        trenutniDatumET = (EditText) view.findViewById(R.id.trenutniDatumTv);
         trenutniDatumET.setText(dateFormat.format(new java.util.Date(posao.getPocetak())));
+
+
+        btnSave = (Button) view.findViewById(R.id.btnSave);
+        btnRemove = (Button) view.findViewById(R.id.btnRemove);
+        btnOdustani = (Button) view.findViewById(R.id.btnOdustani);
+
+        btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String ninja = trenutniDatumET.getText().toString();
+
+                String pos = positionSpinner.getSelectedItem().toString();
+                String startHour = pocetakET.getText().toString();
+                String endHour = krajET.getText().toString();
+
+                if ((pos.length() == 0) || (startHour.length() == 0) || (endHour.length() == 0) || (givenDate() == null)) {
+                    Toast.makeText(getActivity(), "Nisu ispunjena sva polja", Toast.LENGTH_SHORT).show();
+                    //treba se nekako zaustaviti zatvaranje dijaloga u slučaju pogreške
+                } else {
+                    if (CalculationHelper.isMonthBefore(givenDate().getTime()) ||
+                            CalculationHelper.isMonthTooFarForward(givenDate().getTime())){
+                        Toast.makeText(getActivity().getApplicationContext(),
+                                "Možete unositi podatke samo za trenutni i sljedeći mjesec", Toast.LENGTH_LONG).show();
+                    }else {
+                        if (startHour.length() != 5 || endHour.length() != 5){
+                            if (startHour.length() <= 5 && endHour.length() <=5){
+                                try {
+                                    String startTime = startHour.length() < 5 ? popraviTimeFormat(startHour) : startHour;
+                                    String endTime = endHour.length() < 5 ? popraviTimeFormat(endHour) : endHour;
+                                    editComunicator.updatePodataka(pos, startTime, endTime, givenDate(), position, posao.getId());
+                                    dismiss();
+                                }catch (Exception e) {
+                                    Toast.makeText(getActivity().getApplicationContext(),
+                                            "Niste unijeli pravilan format sati hh:mm", Toast.LENGTH_SHORT).show();
+                                }
+                            }else {
+                                Toast.makeText(getActivity().getApplicationContext(),
+                                        "Niste unijeli pravilan format sati hh:mm", Toast.LENGTH_SHORT).show();
+                            }
+                        }else {
+                            editComunicator.updatePodataka(pos, startHour, endHour, givenDate(), position, posao.getId());
+                            dismiss();
+                        }
+                    }
+                }
+            }
+        });
+
+        btnOdustani.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
+
+        btnRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editComunicator.brisanje(position, posao);
+                dismiss();
+            }
+        });
 
         //vrši se postavljanje trenutnih podataka iz baze
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view);
+        /*
         builder.setNegativeButton("Obriši", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -110,9 +179,38 @@ public class EditDialog extends DialogFragment {
                     editComunicator.updatePodataka(pos, startHour, endHour, givenDate, position, posao.getId());
                 }
             }
-        });
+        });*/
 
         return builder.create();
+    }
+
+    //dobalvja datum koji je korisnik zadao u dijalogu
+    public Date givenDate(){
+        String ninja = trenutniDatumET.getText().toString();
+        Date datumText;
+        try {
+            datumText = dateFormat.parse(ninja);
+        } catch (ParseException e) {
+            datumText = null;
+        }
+        return datumText;
+    }
+    //pokuša popraviti String u format HH:mm
+    private String popraviTimeFormat(String time) throws Exception{
+        String[] tekst = time.split(":");
+        StringBuilder sati = new StringBuilder().append(tekst[0]);
+        StringBuilder minute = new StringBuilder().append(tekst[1]);
+        if (tekst.length == 0){
+            throw new Exception();
+        }else {
+            if (tekst[0].length() < 2){
+                sati.insert(0, "0");
+            }
+            if (tekst[1].length() < 2){
+                minute.insert(0, "0");
+            }
+            return sati.toString() + ":" + minute.toString();
+        }
     }
 
     public interface EditDialogComunicator{
