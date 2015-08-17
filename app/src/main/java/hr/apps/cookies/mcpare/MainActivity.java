@@ -22,8 +22,10 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -114,18 +116,6 @@ public class MainActivity extends ActionBarActivity
         tabs = (SlidingTabLayout) findViewById(R.id.tabs);
 
         flowButton = (FloatingActionButton) findViewById(R.id.fab);
-        //LinearLayout mainLayout = (LinearLayout) findViewById(R.id.mainLayout);
-
-        //flowButton = new FloatingActionButton(getApplicationContext());
-        /*LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        flowButton.setButtonSize(FloatingActionButton.SIZE_NORMAL);
-        layoutParams.setMargins(0, -flowButton.getButtonSize(), (int)getPixels(8), 0);
-        flowButton.setLayoutParams(layoutParams);
-        mainLayout.addView(flowButton, 3);
-        */
 
         pagerAdapter = new PagerAdapter(getSupportFragmentManager(), getApplicationContext());
         pager.setAdapter(pagerAdapter);
@@ -163,7 +153,6 @@ public class MainActivity extends ActionBarActivity
                 if (pozicijaFragmenta == 1) {
                     FragmentTrenutni fragment;
                     fragment = (FragmentTrenutni) pagerAdapter.getFragmentAtPosition(pager.getCurrentItem());
-                    Toast.makeText(getApplicationContext(), "pozicija je 1", Toast.LENGTH_SHORT).show();
                     fragment.pozoviComunicator();
 
                 } else if (pozicijaFragmenta == 2) {
@@ -174,8 +163,10 @@ public class MainActivity extends ActionBarActivity
             }
         });
 
-        initializeGoogleCalendarObjects();
 
+
+        initializeGoogleCalendarObjects();
+        
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
 
         alertDialogBuilder.setMessage("Aplikaciji treba pristupiti kalendaru kako bi točno računala plaću.");
@@ -601,10 +592,5 @@ public class MainActivity extends ActionBarActivity
         super.onResume();
         RacunanjeTask racunanjeTask = new RacunanjeTask(MainActivity.this);
         racunanjeTask.execute(0.0);
-    }
-
-    private double getPixels(int dp){
-        Resources r =  getResources();
-        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics());
     }
 }

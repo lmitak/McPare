@@ -438,11 +438,11 @@ public class RacunanjeTask extends AsyncTask<Double, Double, Double[]> {
     private boolean isHoliday(long pocetakRada){
 
         boolean isTrue = false;
+        Calendar datumRada = Calendar.getInstance();
+        datumRada.setTimeInMillis(pocetakRada);
 
         for (long blagdan : listaBlagdana){
-            Calendar datumRada = Calendar.getInstance();
             Calendar datumBlagdana = Calendar.getInstance();
-            datumRada.setTimeInMillis(pocetakRada);
             datumBlagdana.setTimeInMillis(blagdan);
 
             if((datumRada.get(Calendar.YEAR) == datumBlagdana.get(Calendar.YEAR))

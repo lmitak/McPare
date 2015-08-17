@@ -96,17 +96,6 @@ public class DownloadHolidaysTask extends AsyncTask<Void, Void, Void> {
     private List<Long> getHolidays() throws IOException{
         Log.d("lukasTask", "iii krenuli smo...");
         List<Long> datumiUMs = new ArrayList<>();
-        //Events events = mActivity.mService.events().list("en.usa#holiday@group.v.calendar.google.com")
-        /*
-        com.google.api.services.calendar.model.Calendar calendar =
-                mActivity.mService.calendars().get("hr.croatian#holiday@group.v.calendar.google.com")
-                        .execute();
-
-        Collection collection = calendar.values();
-        Set<String> set = calendar.keySet();
-        for (String s: set){
-            Log.d("kolekcija", "key: " + s + ", value: " + calendar.get(s));
-        }*/
         // Construct the {@link Calendar.Events.List} request, but don't execute it yet.
         Calendar.Events.List request = mActivity.mService.events().list("hr.croatian#holiday@group.v.calendar.google.com");
         // Load the sync token stored from the last execution, if any.
@@ -130,12 +119,9 @@ public class DownloadHolidaysTask extends AsyncTask<Void, Void, Void> {
 
         do{
             request.setPageToken(pageToken);
-            Log.d("lukasTask", "do tu ide3");
             try {
                 events = request.execute();
-                Log.d("lukasTask", "do tu ide4");
             }catch (GoogleJsonResponseException e){
-                Log.d("lukasTask", "wupsy");
                 if (e.getStatusCode() == 410) {
                     // A 410 status code, "Gone", indicates that the sync token is invalid.
                     Log.d("lukasTask","Invalid sync token, clearing event store and re-syncing.");
@@ -145,34 +131,18 @@ public class DownloadHolidaysTask extends AsyncTask<Void, Void, Void> {
                     throw e;
                 }
             }
-            Log.d("lukasTask", "i do tu ide");
             List<Event> eventList = events.getItems();
             if (eventList.size() == 0){
                 Log.d("lukasTask", "nothing to sync");
             }else {
-                //List<Long> spremljeniPraznici = new ArrayList<>();
                 Log.d("lukasTask", "sync amount: " + eventList.size());
-                //spremljeniPraznici = helper.getAllHolidyas();
-
                 for (Event e : eventList){
-
-                    /*
-                    Log.d("lukas3", "Summary: " + e.getSummary() + "\nDate" + dateTime.toString());
-                    datumiUMs.add(dateTime.getValue());*/
                     syncEvent(e);
-
                 }
-
             }
             pageToken = events.getNextPageToken();
-            Log.d("lukasTask", "pageToken: " + pageToken);
         }while (pageToken != null);
-        /*Events events = mActivity.mService.events().list("hr.croatian#holiday@group.v.calendar.google.com")
-                .setTimeMin(new DateTime(System.currentTimeMillis())).execute();*/
-        //Log.d("kolekcija", "token: " + events.getNextSyncToken());
-
         putSyncToken(events.getNextSyncToken());
-        Log.d("lukasTask", "syncToken: " + events.getNextSyncToken());
         return datumiUMs;
     }
 
@@ -180,7 +150,6 @@ public class DownloadHolidaysTask extends AsyncTask<Void, Void, Void> {
 
         EventDateTime eDateTime = e.getStart();
         DateTime dateTime = eDateTime.getDate();
-
         if ("canceled".equals(e.getStatus())){
             helper.deleteHoliday(dateTime.getValue());
         }else {
